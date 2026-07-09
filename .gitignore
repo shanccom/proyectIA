@@ -1,0 +1,21 @@
+## LaTeX compilation artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.spl
+*.synctex.gz
+*.pdf
+*.dvi
+*.ps
+
+## macOS
+.DS_Store
+
+## Editor temp files
+*.swp
+*.swo
+*~
