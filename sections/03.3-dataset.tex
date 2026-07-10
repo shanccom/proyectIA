@@ -1,9 +1,92 @@
 \subsection{Dataset}
 \label{sec:dataset}
-Dataset ....
 
-Ejemplo de ecuacion
-\begin{equation}
-\mathit{F1\text{-}score} = 2 \times \frac{\mathit{Precision} \times \mathit{Recall}}{\mathit{Precision} + \mathit{Recall}}
-\label{eq:eq1}
-\end{equation}
+Para el desarrollo del presente proyecto se empleará el dataset \textit{Brain Tumor MRI Datasets}, publicado por Shashin en Kaggle \cite{kaggle_brain_tumor}. Dicho dataset contiene un total de 8764 imágenes de resonancia magnética (MRI) del cerebro organizadas para un problema de clasificación binaria.
+
+Las imágenes se encuentran clasificadas en dos categorías:
+\begin{itemize}
+    \item \textbf{Yes}: pacientes con presencia de tumor cerebral.
+    \item \textbf{No}: pacientes sin evidencia de tumor cerebral.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.34\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/Si_Tumor.png}\par
+    \caption{Ejemplo de imagen perteneciente a la categoría ``Yes''.}
+    \label{fig:si_tumor}
+\end{minipage}
+
+\vspace{0.3cm}
+
+\begin{minipage}{0.34\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{images/No_Tumor.png}
+    \caption{Ejemplo de imagen perteneciente a la categoría ``No''.}
+    \label{fig:no_tumor}
+\end{minipage}
+\end{figure}
+
+Asimismo, el conjunto de datos se encuentra dividido en un 80\% para entrenamiento y un 20\% para pruebas, lo que facilita el desarrollo y la evaluación de modelos de aprendizaje profundo. Debido a que se trata de un conjunto de imágenes, el dataset no presenta atributos tabulares convencionales; cada registro está conformado por una imagen de resonancia magnética y su correspondiente etiqueta de clasificación.
+
+\begin{table}[H]
+\centering
+\caption{Descripción de las variables del dataset.}
+\label{tab:variables}
+\begin{tabular}{lp{0.65\columnwidth}}
+\hline
+\textbf{Variable} & \textbf{Descripción} \\
+\hline
+Imagen MRI & Imagen de resonancia magnética cerebral. \\
+Clase      & Etiqueta de la imagen (``Yes'' o ``No''). \\
+Train/Test & Indica si la imagen pertenece al conjunto de entrenamiento o de prueba. \\
+\hline
+\end{tabular}
+\end{table}
+
+El conjunto de datos está organizado en dos subconjuntos: entrenamiento y prueba. La distribución de imágenes por clase se muestra en la Tabla~\ref{tab:distribucion}.
+
+\begin{table}[H]
+\centering
+\caption{Distribución de imágenes por clase y conjunto.}
+\label{tab:distribucion}
+\begin{tabular}{lrrr}
+\hline
+\textbf{Conjunto} & \textbf{No Tumor} & \textbf{Tumor} & \textbf{Total} \\
+\hline
+Train     & 2869 & 4143 & 7012 \\
+Test      &  717 & 1035 & 1752 \\
+\textbf{Total} & 3586 & 5178 & \textbf{8764} \\
+\hline
+\end{tabular}
+\end{table}
+
+Con el propósito de conocer la distribución de las imágenes, se realizó un análisis considerando la cantidad de muestras por clase y por conjunto de datos.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\textwidth]{images/Distribucion_De_Imagenes_por_Clases.png}
+\caption{Distribución total de imágenes por clase.}
+\label{fig:dist_clases}
+\end{figure}
+
+Como se observa en la Figura~\ref{fig:dist_clases}, el conjunto de datos presenta \textbf{5178 imágenes con tumor (59.1\%)} y \textbf{3586 imágenes sin tumor (40.9\%)}. Esto evidencia un ligero desbalance entre ambas clases, aunque la diferencia no es lo suficientemente grande como para impedir el entrenamiento del modelo.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\textwidth]{images/Distribucion_De_Imagenes_por_clase_y_conjunto.png}
+\caption{Distribución de imágenes por conjunto de entrenamiento y prueba.}
+\label{fig:dist_conjunto}
+\end{figure}
+
+La Figura~\ref{fig:dist_conjunto} muestra que la distribución de imágenes se mantiene tanto en el conjunto de entrenamiento como en el de prueba. En ambos casos, la clase \textbf{Tumor} posee una mayor cantidad de muestras que la clase \textbf{No Tumor}, conservando una proporción similar entre los dos subconjuntos.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.3\textwidth]{images/Distribucion_porcentual_Por_Clase.png}
+\caption{Distribución porcentual de las clases del dataset.}
+\label{fig:dist_porcentual}
+\end{figure}
+
+La Figura~\ref{fig:dist_porcentual} muestra la distribución porcentual de las imágenes del dataset. Se observa que el 59.1\% corresponde a imágenes con tumor cerebral, mientras que el 40.9\% pertenece a imágenes sin tumor. Esta diferencia indica un ligero desbalance entre las clases, el cual debe considerarse durante el entrenamiento del modelo.
