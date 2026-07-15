@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99e
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: article.aux
+Reallocating 'name_of_file' (item size: 1) to 15 items.
+The style file: elsarticle-num.bst
+Reallocating 'name_of_file' (item size: 1) to 11 items.
+Database file #1: references.bib
+Warning--empty chapter and pages in Pichaivel2022
+Warning--empty pages in Pichaivel2022
+You've used 45 entries,
+            2952 wiz_defined-function locations,
+            989 strings with 16604 characters,
+and the built_in function-call counts, 15432 in all, are:
+= -- 1413
+> -- 741
+< -- 4
++ -- 277
+- -- 232
+* -- 1306
+:= -- 2234
+add.period$ -- 89
+call.type$ -- 45
+change.case$ -- 44
+chr.to.int$ -- 0
+cite$ -- 47
+duplicate$ -- 402
+empty$ -- 1546
+format.name$ -- 276
+if$ -- 3873
+int.to.chr$ -- 0
+int.to.str$ -- 45
+missing$ -- 44
+newline$ -- 189
+num.names$ -- 45
+pop$ -- 225
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 950
+stack$ -- 0
+substring$ -- 643
+swap$ -- 154
+text.length$ -- 4
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 2
+while$ -- 89
+width$ -- 47
+write$ -- 465
+(There were 2 warnings)
