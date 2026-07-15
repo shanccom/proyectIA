@@ -1,13 +1,4 @@
-"""
-Data-loading pipeline.
-
-Expects a pre-split dataset at ``DATASET_PATH`` with the structure::
-
-    DATASET_PATH/
-    ├── train/  {class_0/, class_1/}
-    ├── val/    {class_0/, class_1/}
-    └── test/   {class_0/, class_1/}
-"""
+"""Data-loading pipeline. Expects pre-split dataset at DATASET_PATH."""
 
 from pathlib import Path
 
@@ -39,13 +30,6 @@ def _eval_transform():
 
 
 def get_dataloaders():
-    """
-    Build train, validation and test DataLoaders from the pre-split dataset.
-
-    Returns
-    -------
-    tuple[DataLoader, DataLoader, DataLoader]
-    """
     root = Path(DATASET_PATH)
 
     train_dataset = ImageFolder(root=str(root / "train"),

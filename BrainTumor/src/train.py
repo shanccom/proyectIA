@@ -14,7 +14,6 @@ from models import get_model
 
 
 def train_one_epoch(model, loader, criterion, optimizer):
-    """Run one training epoch and return the average loss."""
     model.train()
     total_loss = 0.0
 
@@ -34,7 +33,6 @@ def train_one_epoch(model, loader, criterion, optimizer):
 
 @torch.no_grad()
 def validate(model, loader, criterion):
-    """Run validation and return average loss + metrics dict."""
     model.eval()
     total_loss = 0.0
     all_preds, all_labels, all_probs = [], [], []
@@ -81,15 +79,11 @@ def main():
     results_dir = Path("results") / model_name
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    # ----- Data -----
     train_loader, val_loader, _ = get_dataloaders()
-
-    # ----- Model -----
     model = get_model(model_name).to(DEVICE)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
-    # ----- Training loop -----
     best_val_loss = float("inf")
     history = {"train_loss": [], "val_loss": [], "val_metrics": []}
 
@@ -111,9 +105,8 @@ def main():
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             torch.save(model.state_dict(), results_dir / "best_model.pth")
-            print("  ✓ New best model saved.")
+            print("  New best model saved.")
 
-    # ----- Save history -----
     with open(results_dir / "history.json", "w") as f:
         json.dump(history, f, indent=2)
 

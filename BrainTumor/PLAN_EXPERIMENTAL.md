@@ -74,24 +74,24 @@ Los integrantes B, C, D también pueden ayudar a evaluar los modelos de A al ter
 4. Al terminar, copia `results/<modelo>/` a una carpeta compartida (Drive/GitHub)
 5. El integrante A unifica todos los `results/` y ejecuta la comparación final
 
-## 7. Checklist de verificación
+## 7. Checklist de verificacion
 
 | Item | Estado |
 |---|---|
-| Dataset descargado y organizado | ✅ |
-| División pre-hecha (train/val/test) | ✅ |
-| Dependencias instaladas | ✅ (torch 2.13, torchvision 0.28, matplotlib, sklearn, tqdm) |
-| requirements.txt fijado | ✅ |
-| Config experimental definida | ✅ (config.py) |
-| Métricas definidas | ✅ (metrics.py) |
-| Pipeline de entrenamiento | ✅ (train.py + argparse) |
-| Pipeline de evaluación | ✅ (evaluate.py) |
-| Colab setup listo | ✅ (notebooks/colab_setup.ipynb) |
-| Flag --epochs para pruebas | ✅ |
-| Auto-detectar CPU / CUDA | ✅ |
-| Data augmentation en train | ✅ (flip + rotation) |
-| Carpetas de resultados creadas | ✅ |
-| Estructura subida a git | ✅ (.gitkeep en carpetas vacías) |
+| Dataset descargado y organizado | Si |
+| Division pre-hecha (train/val/test) | Si |
+| Dependencias instaladas | Si (torch 2.13, torchvision 0.28, matplotlib, sklearn, tqdm) |
+| requirements.txt fijado | Si |
+| Config experimental definida | Si (config.py) |
+| Metricas definidas | Si (metrics.py) |
+| Pipeline de entrenamiento | Si (train.py + argparse) |
+| Pipeline de evaluacion | Si (evaluate.py) |
+| Colab setup listo | Si (notebooks/colab_setup.ipynb) |
+| Flag --epochs para pruebas | Si |
+| Auto-detectar CPU / CUDA | Si |
+| Data augmentation en train | Si (flip + rotation) |
+| Carpetas de resultados creadas | Si |
+| Estructura subida a git | Si (.gitkeep en carpetas vacias) |
 
 ## 8. Pendiente — antes del entrenamiento final
 
