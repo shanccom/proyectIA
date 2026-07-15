@@ -5,10 +5,10 @@ __pycache__/
 dist/
 
 # Training artifacts
-results/*/best_model.pth
-results/*/history.json
-results/*/*.png
-results/*/metrics.json
+#results/*/best_model.pth
+#results/*/history.json
+#results/*/*.png
+#results/*/metrics.json
 
 # IDE
 .vscode/
