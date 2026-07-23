@@ -104,9 +104,9 @@ Bloques de atencion con sesgo de posicion relativa, utilizados en las etapas sup
 **Transformer Block:**
 Bloques clasicos de Transformer con atencion global y MLP, utilizados en las ultimas etapas.
 
-## 8. CoAtNet-0 (la variante que usamos)
+## 8. CoAtNet-0 rw_224 (la variante que usamos)
 
-Es la version mas pequena de la familia CoAtNet. Sus parametros:
+Es la version mas pequena de la familia CoAtNet, con pesos entrenados por Ross Wightman (rw) a resolucion 224. Sus parametros:
 
 | Componente | Valor |
 |---|---|
@@ -116,6 +116,8 @@ Es la version mas pequena de la familia CoAtNet. Sus parametros:
 | Factor de expansion MLP | 4 |
 | Tamano de kernel Conv | 3x3 |
 | Parametros totales | ~25M |
+
+La variante `rw_224` se refiere a los pesos publicados por Ross Wightman (autor de timm), entrenados con una receta mejorada que incluye regularizacion mas fuerte y aumentacion de datos mas agresiva durante el preentrenamiento en ImageNet.
 
 ## 9. Por que CoAtNet mejora a ViT
 
@@ -134,7 +136,7 @@ Es la version mas pequena de la familia CoAtNet. Sus parametros:
 
 | Modelo | Parametros | Precisión ImageNet |
 |---|---|---|
-| CoAtNet-0 | 25M | 81.6% |
+| CoAtNet-0 rw_224 | 25M | 81.6% |
 | CoAtNet-1 | 42M | 83.3% |
 | CoAtNet-2 | 75M | 84.1% |
 | CoAtNet-3 | 168M | 84.5% |

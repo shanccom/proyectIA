@@ -66,10 +66,8 @@ def main():
     model.eval()
 
     total_params = count_parameters(model)
-    print(f"\n{'='*50}")
-    print(f"Evaluando: {model_name} ({phase_tag})")
-    print(f"Parámetros totales: {total_params:,}")
-    print(f"{'='*50}\n")
+    print(f"\nEvaluando: {model_name} ({phase_tag})")
+    print(f"Parametros totales: {total_params:,}\n")
 
     all_preds, all_labels, all_probs = [], [], []
 

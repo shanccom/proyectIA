@@ -29,7 +29,7 @@ def train_one_epoch(model, loader, criterion, optimizer, scaler, use_amp):
         optimizer.zero_grad()
 
         if use_amp:
-            with torch.amp.autocast(device_type=DEVICE):
+            with torch.cuda.amp.autocast():
                 outputs = model(images)
                 loss = criterion(outputs, labels)
             scaler.scale(loss).backward()
@@ -108,22 +108,21 @@ def main():
         min_lr=MIN_LR if is_optimized else 0.0,
     )
 
-    print(f"\n{'='*60}")
-    print(f"  Modelo:     {model_name}")
-    print(f"  Fase:       {phase} ({'Optimizado' if is_optimized else 'Base'})")
-    print(f"  Épocas máx: {max_epochs}")
-    print(f"  Augment:    {'Sí' if use_augment else 'No'}")
-    print(f"  AMP:        {'Sí' if use_amp else 'No'}")
-    print(f"  Device:     {DEVICE}")
-    print(f"  Parada por:")
+    print(f"\nModelo:     {model_name}")
+    print(f"Fase:       {phase} ({'Optimizado' if is_optimized else 'Base'})")
+    print(f"Epocas max: {max_epochs}")
+    print(f"Augment:    {'Si' if use_augment else 'No'}")
+    print(f"AMP:        {'Si' if use_amp else 'No'}")
+    print(f"Device:     {DEVICE}")
+    print(f"Parada por:")
     if is_optimized:
-        print(f"    • Precisión objetivo ≥ {STOP_ACCURACY}")
-        print(f"    • Convergencia (ventana={CONVERGENCE_WINDOW}, delta={MIN_DELTA})")
-        print(f"    • Early stopping (paciencia={EARLY_STOPPING_PATIENCE})")
-        print(f"    • LR mínimo < {MIN_LR}")
+        print(f"  - Precision objetivo >= {STOP_ACCURACY}")
+        print(f"  - Convergencia (ventana={CONVERGENCE_WINDOW}, delta={MIN_DELTA})")
+        print(f"  - Early stopping (paciencia={EARLY_STOPPING_PATIENCE})")
+        print(f"  - LR minimo < {MIN_LR}")
     else:
-        print(f"    • Máximo de épocas ({max_epochs})")
-    print(f"{'='*60}\n")
+        print(f"  - Maximo de epocas ({max_epochs})")
+    print()
 
     train_loader, val_loader, _ = get_dataloaders(augment=use_augment)
     model = get_model(model_name).to(DEVICE)
@@ -140,7 +139,7 @@ def main():
             patience=LR_SCHEDULER_PATIENCE, verbose=True
         )
 
-    scaler = torch.amp.GradScaler(device_type=DEVICE) if use_amp else None
+    scaler = torch.cuda.amp.GradScaler() if use_amp else None
 
     history = {
         "train_loss": [], "val_loss": [], "val_metrics": [],
@@ -201,9 +200,9 @@ def main():
     with open(results_dir / "model_info.json", "w") as f:
         json.dump(model_info, f, indent=2)
 
-    print(f"\n✓ Entrenamiento finalizado — {stop_reason}")
-    print(f"  Épocas ejecutadas: {epoch}")
-    print(f"  Resultados en: {results_dir}")
+    print(f"\nEntrenamiento finalizado - {stop_reason}")
+    print(f"Epocas ejecutadas: {epoch}")
+    print(f"Resultados en: {results_dir}")
 
 
 if __name__ == "__main__":

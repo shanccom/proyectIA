@@ -31,9 +31,21 @@ def get_model(name):
 
     elif name == "coatnet":
         import timm
-        model = timm.create_model(
-            "coatnet_0", pretrained=True, num_classes=NUM_CLASSES
-        )
+        try:
+            model = timm.create_model(
+                "coatnet_0_rw_224", pretrained=True, num_classes=NUM_CLASSES
+            )
+        except RuntimeError:
+            coat_models = [m for m in timm.list_models() if "coatnet" in m]
+            if not coat_models:
+                raise RuntimeError(
+                    "No se encontro ningun modelo CoAtNet en timm. "
+                    "Actualiza timm: pip install -U timm>=0.9.0"
+                )
+            model = timm.create_model(
+                coat_models[0], pretrained=True, num_classes=NUM_CLASSES
+            )
+            print(f"Usando {coat_models[0]} como alternativa a coatnet_0")
 
     else:
         raise ValueError(
@@ -47,9 +59,7 @@ def get_model(name):
 def print_model_info(model, model_name):
     total = count_parameters(model)
     trainable = count_trainable_parameters(model)
-    print(f"\n{'='*50}")
-    print(f"Modelo: {model_name}")
-    print(f"Parámetros totales:   {total:,}")
-    print(f"Parámetros entrenables: {trainable:,}")
-    print(f"{'='*50}\n")
+    print(f"\nModelo: {model_name}")
+    print(f"Parametros totales:     {total:,}")
+    print(f"Parametros entrenables: {trainable:,}\n")
     return {"model": model_name, "total_params": total, "trainable_params": trainable}
