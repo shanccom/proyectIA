@@ -2,6 +2,7 @@ import torchvision.models as models
 import torch.nn as nn
 
 from config import NUM_CLASSES
+from utils import count_parameters, count_trainable_parameters
 
 
 def get_model(name):
@@ -28,15 +29,27 @@ def get_model(name):
         model = models.swin_t(weights=models.Swin_T_Weights.DEFAULT)
         model.head = nn.Linear(model.head.in_features, NUM_CLASSES)
 
-    elif name == "cvt":
-        # Requires: pip install cvt-pytorch
-        from cvt import CVT
-        model = CVT(num_classes=NUM_CLASSES)
+    elif name == "coatnet":
+        import timm
+        model = timm.create_model(
+            "coatnet_0", pretrained=True, num_classes=NUM_CLASSES
+        )
 
     else:
         raise ValueError(
             f"Unknown model '{name}'. "
-            f"Choices: resnet50, efficientnet_b0, vit, swin, cvt"
+            f"Choices: resnet50, efficientnet_b0, vit, swin, coatnet"
         )
 
     return model
+
+
+def print_model_info(model, model_name):
+    total = count_parameters(model)
+    trainable = count_trainable_parameters(model)
+    print(f"\n{'='*50}")
+    print(f"Modelo: {model_name}")
+    print(f"Parámetros totales:   {total:,}")
+    print(f"Parámetros entrenables: {trainable:,}")
+    print(f"{'='*50}\n")
+    return {"model": model_name, "total_params": total, "trainable_params": trainable}

@@ -7,24 +7,39 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 
-from config import EPOCHS, LEARNING_RATE, DEVICE
+from config import (
+    EPOCHS, LEARNING_RATE, WEIGHT_DECAY, DEVICE,
+    EARLY_STOPPING_PATIENCE, LR_SCHEDULER_FACTOR,
+    LR_SCHEDULER_PATIENCE, MIXED_PRECISION, USE_AUGMENTATION,
+    STOP_ACCURACY, CONVERGENCE_WINDOW, MIN_DELTA, MIN_LR,
+)
 from dataset import get_dataloaders
 from metrics import compute_metrics
-from models import get_model
+from models import get_model, print_model_info
+from utils import Timer, gpu_memory_usage, ConvergenceStopper
 
 
-def train_one_epoch(model, loader, criterion, optimizer):
+def train_one_epoch(model, loader, criterion, optimizer, scaler, use_amp):
     model.train()
     total_loss = 0.0
 
-    for images, labels in tqdm(loader, desc="Training"):
+    for images, labels in tqdm(loader, desc="  Train"):
         images, labels = images.to(DEVICE), labels.to(DEVICE)
 
         optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
+
+        if use_amp:
+            with torch.amp.autocast(device_type=DEVICE):
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
 
         total_loss += loss.item()
 
@@ -37,7 +52,7 @@ def validate(model, loader, criterion):
     total_loss = 0.0
     all_preds, all_labels, all_probs = [], [], []
 
-    for images, labels in tqdm(loader, desc="Validation"):
+    for images, labels in tqdm(loader, desc="  Val"):
         images, labels = images.to(DEVICE), labels.to(DEVICE)
         outputs = model(images)
         loss = criterion(outputs, labels)
@@ -60,57 +75,135 @@ def main():
         description="Train a brain-tumor classification model."
     )
     parser.add_argument(
-        "--model",
-        type=str,
-        required=True,
-        choices=["resnet50", "efficientnet_b0", "vit", "swin", "cvt"],
+        "--model", type=str, required=True,
+        choices=["resnet50", "efficientnet_b0", "vit", "swin", "coatnet"],
         help="Model architecture to train.",
     )
     parser.add_argument(
-        "--epochs",
-        type=int,
-        default=None,
-        help="Override EPOCHS from config.py (useful for quick tests).",
+        "--phase", type=int, default=1, choices=[1, 2],
+        help="Fase 1 = Base (sin optimización), Fase 2 = Optimizado.",
+    )
+    parser.add_argument(
+        "--epochs", type=int, default=None,
+        help="Override EPOCHS from config.py (límite máximo).",
     )
     args = parser.parse_args()
 
     model_name = args.model
-    epochs = args.epochs if args.epochs is not None else EPOCHS
-    results_dir = Path("results") / model_name
+    phase = args.phase
+    is_optimized = phase == 2
+    max_epochs = args.epochs if args.epochs is not None else EPOCHS
+    use_amp = MIXED_PRECISION and is_optimized and DEVICE == "cuda"
+    use_augment = USE_AUGMENTATION and is_optimized
+
+    phase_tag = "optimized" if is_optimized else "base"
+    results_dir = Path("results") / model_name / phase_tag
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    train_loader, val_loader, _ = get_dataloaders()
+    stopper = ConvergenceStopper(
+        patience=EARLY_STOPPING_PATIENCE if is_optimized else 999,
+        stop_accuracy=STOP_ACCURACY if is_optimized else 1.0,
+        convergence_window=CONVERGENCE_WINDOW if is_optimized else 999,
+        min_delta=MIN_DELTA if is_optimized else 0.0,
+        min_lr=MIN_LR if is_optimized else 0.0,
+    )
+
+    print(f"\n{'='*60}")
+    print(f"  Modelo:     {model_name}")
+    print(f"  Fase:       {phase} ({'Optimizado' if is_optimized else 'Base'})")
+    print(f"  Épocas máx: {max_epochs}")
+    print(f"  Augment:    {'Sí' if use_augment else 'No'}")
+    print(f"  AMP:        {'Sí' if use_amp else 'No'}")
+    print(f"  Device:     {DEVICE}")
+    print(f"  Parada por:")
+    if is_optimized:
+        print(f"    • Precisión objetivo ≥ {STOP_ACCURACY}")
+        print(f"    • Convergencia (ventana={CONVERGENCE_WINDOW}, delta={MIN_DELTA})")
+        print(f"    • Early stopping (paciencia={EARLY_STOPPING_PATIENCE})")
+        print(f"    • LR mínimo < {MIN_LR}")
+    else:
+        print(f"    • Máximo de épocas ({max_epochs})")
+    print(f"{'='*60}\n")
+
+    train_loader, val_loader, _ = get_dataloaders(augment=use_augment)
     model = get_model(model_name).to(DEVICE)
+    model_info = print_model_info(model, model_name)
+
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE,
+                           weight_decay=WEIGHT_DECAY if is_optimized else 0.0)
 
+    scheduler = None
+    if is_optimized:
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", factor=LR_SCHEDULER_FACTOR,
+            patience=LR_SCHEDULER_PATIENCE, verbose=True
+        )
+
+    scaler = torch.amp.GradScaler(device_type=DEVICE) if use_amp else None
+
+    history = {
+        "train_loss": [], "val_loss": [], "val_metrics": [],
+        "lr": [], "epoch_time": [],
+    }
     best_val_loss = float("inf")
-    history = {"train_loss": [], "val_loss": [], "val_metrics": []}
+    timer = Timer()
+    stop_reason = "Máximo de épocas alcanzado"
 
-    for epoch in range(1, epochs + 1):
-        train_loss = train_one_epoch(model, train_loader, criterion, optimizer)
+    for epoch in range(1, max_epochs + 1):
+        timer.begin()
+        current_lr = optimizer.param_groups[0]["lr"]
+        history["lr"].append(current_lr)
+
+        print(f"Epoch {epoch:2d}/{max_epochs}  |  LR: {current_lr:.2e}")
+
+        train_loss = train_one_epoch(model, train_loader, criterion,
+                                     optimizer, scaler, use_amp)
         val_loss, val_metrics = validate(model, val_loader, criterion)
 
+        epoch_time = timer.elapsed()
+        history["epoch_time"].append(epoch_time)
         history["train_loss"].append(train_loss)
         history["val_loss"].append(val_loss)
         history["val_metrics"].append(val_metrics)
 
         print(
-            f"Epoch {epoch:2d}/{epochs}  |  "
-            f"Train Loss: {train_loss:.4f}  |  "
+            f"  → Train Loss: {train_loss:.4f}  |  "
             f"Val Loss: {val_loss:.4f}  |  "
-            f"Val Acc: {val_metrics['accuracy']:.4f}"
+            f"Val Acc: {val_metrics['accuracy']:.4f}  |  "
+            f"Tiempo: {timer.elapsed_str()}"
         )
+
+        if scheduler is not None:
+            scheduler.step(val_loss)
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             torch.save(model.state_dict(), results_dir / "best_model.pth")
-            print("  New best model saved.")
+            print("  ✓ Nuevo mejor modelo guardado.")
+
+        reasons = stopper.check(
+            epoch, val_loss, val_metrics["accuracy"], current_lr
+        )
+        if reasons:
+            for r in reasons:
+                print(f"  ⏹ {r}")
+            stop_reason = "; ".join(reasons)
+            break
+
+    history["epochs_executed"] = epoch
+    history["stop_reason"] = stop_reason
+    model_info["gpu_memory_gb"] = gpu_memory_usage()
 
     with open(results_dir / "history.json", "w") as f:
         json.dump(history, f, indent=2)
 
-    print(f"\nDone. Results saved in {results_dir}")
+    with open(results_dir / "model_info.json", "w") as f:
+        json.dump(model_info, f, indent=2)
+
+    print(f"\n✓ Entrenamiento finalizado — {stop_reason}")
+    print(f"  Épocas ejecutadas: {epoch}")
+    print(f"  Resultados en: {results_dir}")
 
 
 if __name__ == "__main__":
