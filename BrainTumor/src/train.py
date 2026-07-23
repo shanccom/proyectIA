@@ -136,7 +136,7 @@ def main():
     if is_optimized:
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(
             optimizer, mode="min", factor=LR_SCHEDULER_FACTOR,
-            patience=LR_SCHEDULER_PATIENCE, verbose=True
+            patience=LR_SCHEDULER_PATIENCE
         )
 
     scaler = torch.cuda.amp.GradScaler() if use_amp else None
