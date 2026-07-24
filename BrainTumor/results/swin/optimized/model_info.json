@@ -1,0 +1,6 @@
+{
+  "model": "swin",
+  "total_params": 27520892,
+  "trainable_params": 27520892,
+  "gpu_memory_gb": 2.5059947967529297
+}
