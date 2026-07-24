@@ -1,5 +1,95 @@
 \subsection{ViT-B/16}
 
-\paragraph{Fase Base:}
+\paragraph{Evaluación Cuantitativa de ViT-B/16:}
 
-\paragraph{Fase Optimizada:}
+\subparagraph{Fase Base (30 épocas fijas):}
+El ViT-B/16 fue entrenado durante 30 épocas con una tasa de aprendizaje fija de $1\times10^{-4}$. Las métricas obtenidas en el conjunto de prueba se presentan en la Tabla~\ref{tab:vit_base_metrics}. El modelo alcanzó un accuracy de 99.14\%, un F1-Score de 99.28\% y un AUC-ROC de 0.9991, posicionándose como el modelo con el rendimiento más bajo entre las cinco arquitecturas evaluadas a pesar de contar con 85.8~M de parámetros, la mayor capacidad del estudio.
+
+\begin{table}[H]
+\centering
+\caption{Métricas de evaluación de ViT-B/16 en la fase base.}
+\label{tab:vit_base_metrics}
+\begin{tabular}{lc}
+\hline
+Métrica & Valor \\
+\hline
+Accuracy  & 99.14\% \\
+Balanced Accuracy & 99.08\% \\
+Precisión & 99.13\% \\
+Recall (Sensibilidad) & 99.42\% \\
+Especificidad & 98.74\% \\
+F1-Score & 99.28\% \\
+MCC & 0.9823 \\
+AUC-ROC & 0.9991 \\
+\hline
+\end{tabular}
+\end{table}
+
+La pérdida de entrenamiento descendió de 0.1063 en la primera época a $2.38\times10^{-6}$ en la época 30, aproximándose a cero, lo que constituye un indicador temprano de sobreajuste severo. La pérdida de validación alcanzó su mínimo en la época~5 con un valor de 0.0218; sin embargo, a partir de la época~8 se observó una tendencia ascendente sostenida, pasando de 0.0285 a 0.0427 en la época~30, confirmando la degradación progresiva de la generalización a pesar de la mejora continua en el conjunto de entrenamiento. El mejor accuracy de validación fue de 99.43\%, registrado a partir de la época~7 y mantenido en meseta hasta el final del entrenamiento.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../BrainTumor/results/vit/base/confusion_matrix.png}
+    \caption{Matriz de confusión de ViT-B/16 en la fase base.}
+    \label{fig:vit_base_cm}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../BrainTumor/results/vit/base/roc_curve.png}
+    \caption{Curva ROC de ViT-B/16 en la fase base.}
+    \label{fig:vit_base_roc}
+\end{minipage}
+\end{figure}
+
+\subparagraph{Fase Optimizada (Early Stopping y optimización adaptativa):}
+Se aplicaron ReduceLROnPlateau (factor~0.5, paciencia~3) y early stopping con paciencia de~7 épocas sobre val\_loss. El entrenamiento se detuvo en la época~14 por ausencia de mejora en la pérdida de validación durante 7 épocas consecutivas, preservando los pesos de la época~7 (mejor val\_loss de 0.0222). La tasa de aprendizaje se redujo de $1\times10^{-4}$ a $5\times10^{-5}$ en la época~11. Las métricas finales se muestran en la Tabla~\ref{tab:vit_opt_metrics}.
+
+\begin{table}[H]
+\centering
+\caption{Métricas de evaluación de ViT-B/16 en la fase optimizada.}
+\label{tab:vit_opt_metrics}
+\begin{tabular}{lc}
+\hline
+Métrica & Valor \\
+\hline
+Accuracy  & 99.14\% \\
+Balanced Accuracy & 99.10\% \\
+Precisión & 99.23\% \\
+Recall (Sensibilidad) & 99.32\% \\
+Especificidad & 98.88\% \\
+F1-Score & 99.28\% \\
+MCC & 0.9823 \\
+AUC-ROC & 0.9991 \\
+\hline
+\end{tabular}
+\end{table}
+
+La fase optimizada introdujo data augmentation y mixed precision (AMP), lo que permitió reducir el tiempo por época de 215~s a 72~s y la memoria GPU de 4.82~GB a 3.33~GB. El early stopping limitó el entrenamiento a 14 épocas frente a las 30 de la fase base. No obstante, las métricas de test se mantuvieron prácticamente idénticas a las obtenidas en la fase base: el accuracy permaneció en 99.14\%, el F1-Score en 99.28\% y el AUC-ROC en 0.9991. Este estancamiento sugiere que las limitaciones de ViT-B/16 en este dominio no provienen de la configuración del entrenamiento, sino de propiedades arquitectónicas intrínsecas del modelo.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../BrainTumor/results/vit/optimized/confusion_matrix.png}
+    \caption{Matriz de confusión de ViT-B/16 optimizado.}
+    \label{fig:vit_opt_cm}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../BrainTumor/results/vit/optimized/roc_curve.png}
+    \caption{Curva ROC de ViT-B/16 optimizado.}
+    \label{fig:vit_opt_roc}
+\end{minipage}
+\end{figure}
+
+\paragraph{Matriz de Confusión y Curvas de Aprendizaje:}
+
+El análisis de la evolución de la pérdida revela un patrón de sobreajuste característico en transformers puros entrenados sobre datasets de tamaño moderado. En la fase base, la pérdida de entrenamiento descendió de manera monotónica hasta $2.38\times10^{-6}$ en la época~30, mientras que la pérdida de validación, tras alcanzar un mínimo de 0.0218 en la época~5, exhibió una tendencia ascendente sostenida que la llevó a 0.0427 al finalizar el entrenamiento. La divergencia entre train\_loss y val\_loss a partir de la época~5 constituye la firma clásica de sobreajuste: el modelo memoriza progresivamente el conjunto de entrenamiento sin mejorar su capacidad de generalización.
+
+En la fase optimizada, la incorporación de data augmentation atenuó parcialmente este fenómeno: la pérdida de entrenamiento se mantuvo en 0.0040 en la época~14 (cuatro órdenes de magnitud por encima del valor asintótico de la fase base) y la pérdida de validación mínima fue de 0.0222 en la época~7. Sin embargo, la tendencia al sobreajuste persistió, como evidencia el incremento de val\_loss hasta 0.0422 en las últimas épocas, lo que activó el mecanismo de early stopping.
+
+Las matrices de confusión en ambas fases (Figuras~\ref{fig:vit_base_cm} y \ref{fig:vit_opt_cm}) muestran una distribución de errores con mayor proporción de falsos negativos que de falsos positivos, indicando una ligera tendencia del modelo a clasificar erróneamente casos tumorales como no tumorales. Esta asimetría es consistente con la diferencia observada entre recall (99.42\% fase base) y especificidad (98.74\% fase base), y podría atribuirse a la ausencia de sesgos inductivos locales que ayuden al modelo a identificar patrones sutiles en regiones tumorales de apariencia atípica. Las curvas ROC en ambas fases (Figuras~\ref{fig:vit_base_roc} y \ref{fig:vit_opt_roc}) alcanzan valores de AUC superiores a 0.999, confirmando que, a pesar del sobreajuste, el poder discriminativo global del modelo se mantiene alto.
