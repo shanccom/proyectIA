@@ -1,13 +1,13 @@
-\subsection{ViT-B/16}
+\subsection{ViT-B\slash{}16}
 
-\paragraph{Evaluación Cuantitativa de ViT-B/16:}
+\paragraph{Evaluación Cuantitativa de ViT-B\slash{}16:}
 
 \subparagraph{Fase Base (30 épocas fijas):}
 El ViT-B/16 fue entrenado durante 30 épocas con una tasa de aprendizaje fija de $1\times10^{-4}$. Las métricas obtenidas en el conjunto de prueba se presentan en la Tabla~\ref{tab:vit_base_metrics}. El modelo alcanzó un accuracy de 99.14\%, un F1-Score de 99.28\% y un AUC-ROC de 0.9991, posicionándose como el modelo con el rendimiento más bajo entre las cinco arquitecturas evaluadas a pesar de contar con 85.8~M de parámetros, la mayor capacidad del estudio.
 
 \begin{table}[H]
 \centering
-\caption{Métricas de evaluación de ViT-B/16 en la fase base.}
+\caption{Métricas de evaluación de ViT-B\slash{}16 en la fase base.}
 \label{tab:vit_base_metrics}
 \begin{tabular}{lc}
 \hline
@@ -32,14 +32,14 @@ La pérdida de entrenamiento descendió de 0.1063 en la primera época a $2.38\t
 \begin{minipage}{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{../BrainTumor/results/vit/base/confusion_matrix.png}
-    \caption{Matriz de confusión de ViT-B/16 en la fase base.}
+    \caption{Matriz de confusión de ViT-B\slash{}16 en la fase base.}
     \label{fig:vit_base_cm}
 \end{minipage}
 \hfill
 \begin{minipage}{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{../BrainTumor/results/vit/base/roc_curve.png}
-    \caption{Curva ROC de ViT-B/16 en la fase base.}
+    \caption{Curva ROC de ViT-B\slash{}16 en la fase base.}
     \label{fig:vit_base_roc}
 \end{minipage}
 \end{figure}
@@ -49,7 +49,7 @@ Se aplicaron ReduceLROnPlateau (factor~0.5, paciencia~3) y early stopping con pa
 
 \begin{table}[H]
 \centering
-\caption{Métricas de evaluación de ViT-B/16 en la fase optimizada.}
+\caption{Métricas de evaluación de ViT-B\slash{}16 en la fase optimizada.}
 \label{tab:vit_opt_metrics}
 \begin{tabular}{lc}
 \hline
@@ -74,14 +74,14 @@ La fase optimizada introdujo data augmentation y mixed precision (AMP), lo que p
 \begin{minipage}{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{../BrainTumor/results/vit/optimized/confusion_matrix.png}
-    \caption{Matriz de confusión de ViT-B/16 optimizado.}
+    \caption{Matriz de confusión de ViT-B\slash{}16 optimizado.}
     \label{fig:vit_opt_cm}
 \end{minipage}
 \hfill
 \begin{minipage}{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{../BrainTumor/results/vit/optimized/roc_curve.png}
-    \caption{Curva ROC de ViT-B/16 optimizado.}
+    \caption{Curva ROC de ViT-B\slash{}16 optimizado.}
     \label{fig:vit_opt_roc}
 \end{minipage}
 \end{figure}

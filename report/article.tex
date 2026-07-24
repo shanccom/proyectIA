@@ -96,6 +96,8 @@
 
 % to be able to introduce multiple figures that occupy the width of the two columns.
 \usepackage{subfigure}
+\usepackage{array}
+\usepackage{placeins}
 
 % declarations for front matter
 
@@ -187,6 +189,7 @@ Palabras clave 1 \sep Palabra clave 2 \sep Palabra clave 3 \sep Palabra clave 4 
 %% main text
 \input{sections/01-introduccion}
 \input{sections/02-related_work}
+\FloatBarrier
 \input{sections/03-material_methods}
 \input{sections/04-resultados}
 \input{sections/05-discusion}
