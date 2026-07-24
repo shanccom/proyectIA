@@ -1,20 +1,30 @@
-\section{Discusion}
+\section{Discusión}
 \label{sec:discussion}
-Discusion
 
-Ejemplo de Tabla a una columna
+\paragraph{Eficiencia de Mecanismos de Atención Local vs. Global:}
+
+Los resultados obtenidos revelan una relación inversa entre el alcance del mecanismo de atención y la eficiencia computacional en la clasificación de tumores cerebrales. Swin-T (atención local por ventanas desplazadas) alcanzó un accuracy de 99.60\% y un AUC-ROC de 0.9999 con solo 27.5~M de parámetros, 154.98~ms de inferencia por batch y 3.56~GB de memoria GPU en su fase base. En contraste, ViT-B/16 (atención global) obtuvo un accuracy de 99.14\% y un AUC-ROC de 0.9991 con 85.8~M de parámetros, 360.33~ms de inferencia y 4.82~GB de memoria GPU.
+
+La autoatención dentro de ventanas desplazadas (\emph{Shifted Windows}) reduce la complejidad computacional de $O(N^2)$ a $O(M^2\cdot N/M^2)=O(N\cdot M)$ para una imagen de $N$ parches con ventanas de $M$ parches cada una. En la práctica, para una imagen de entrada de $224\times224$ con parches de $4\times4$ ($N=3136$) y ventanas de $7\times7$ ($M=49$), la atención local procesa cada parche dentro de un contexto de 49~vecinos en lugar de los 3136~pares completos. Esto explica la reducción del 57\% en el tiempo de inferencia (154.98~ms frente a 360.33~ms) y del 26\% en memoria GPU (3.56~GB frente a 4.82~GB) respecto a ViT-B/16.
+
+Esta restricción local no solo no perjudica la capacidad discriminativa, sino que la mejora: Swin-T supera a ViT-B/16 en accuracy (+0.46\%), F1-Score (+0.90\%) y AUC-ROC (+0.0008). Este comportamiento se debe a que las regiones de interés en imágenes de glioma, meningioma y pituitary son inherentemente locales y de tamaño acotado. El mecanismo de ventanas desplazadas introduce conectividad cruzada entre ventanas en capas sucesivas, permitiendo que la información fluya a través de vecindarios progresivamente más amplios sin incurrir en el costo cuadrático de la atención global. Así, Swin-T logra un equilibrio óptimo entre eficiencia computacional y precisión diagnóstica, posicionándose como una alternativa superior a ViT-B/16 para el análisis de imágenes médicas con recursos computacionales limitados.
+
 \begin{table}[H]
   \centering
-  \caption{Ejemplo de Tabla}
-  \label{tab:table2}
-  \begin{tabular*}{\hsize}{l p{4cm}}
+  \caption{Comparación de eficiencia: atención local (Swin-T) vs. atención global (ViT-B/16).}
+  \label{tab:swin_vit_comparison}
+  \begin{tabular}{lcc}
     \hline
-    \textbf{Parameter} & \textbf{Description} \\
+    \textbf{Métrica} & \textbf{Swin-T} & \textbf{ViT-B/16} \\
     \hline
-    Parameter1 & Text of example. \\
-    Parameter2 & Text of example. \\
-    Parameter3 & Text of example. \\
-    Parameter4 & Text of example. \\
+    Parámetros & 27.5M & 85.8M \\
+    Memoria GPU (base) & 3.56~GB & 4.82~GB \\
+    Inferencia por batch & 154.98~ms & 360.33~ms \\
+    Accuracy & 99.60\% & 99.14\% \\
+    F1-Score & 99.66\% & 99.28\% \\
+    AUC-ROC & 0.9999 & 0.9991 \\
     \hline
-  \end{tabular*}
+  \end{tabular}
 \end{table}
+
+\end{section}

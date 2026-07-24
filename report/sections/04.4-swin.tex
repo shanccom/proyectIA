@@ -1,5 +1,93 @@
 \subsection{Swin Transformer}
 
-\paragraph{Fase Base:}
+\paragraph{Desempeño del Swin Transformer:}
 
-\paragraph{Fase Optimizada:}
+\subparagraph{Fase Base (30 épocas fijas):}
+El Swin-T fue entrenado durante 30 épocas con una tasa de aprendizaje fija de $1\times10^{-4}$. Las métricas obtenidas en el conjunto de prueba se presentan en la Tabla~\ref{tab:swin_base_metrics}. Se obtuvo un accuracy de 99.26\%, un F1-Score de 99.37\% y un AUC-ROC de 0.9997, evidenciando una alta capacidad discriminativa.
+
+\begin{table}[H]
+\centering
+\caption{Métricas de evaluación de Swin-T en la fase base.}
+\label{tab:swin_base_metrics}
+\begin{tabular}{lc}
+\hline
+Métrica & Valor \\
+\hline
+Accuracy  & 99.26\% \\
+Balanced Accuracy & 99.29\% \\
+Precisión & 99.61\% \\
+Recall (Sensibilidad) & 99.13\% \\
+Especificidad & 99.44\% \\
+F1-Score & 99.37\% \\
+MCC & 0.9847 \\
+AUC-ROC & 0.9997 \\
+\hline
+\end{tabular}
+\end{table}
+
+La pérdida de entrenamiento descendió de 0.084 en la primera época a $2.8\times10^{-4}$ en la época~24. La pérdida de validación mínima se registró en la época~3 con un valor de 0.0049, aunque se observaron fluctuaciones a lo largo del entrenamiento, con algunos picos puntuales (época~8 con 0.071), lo que refleja cierta inestabilidad en la convergencia con tasa fija. El mejor accuracy de validación se alcanzó en la época~28 con 99.86\%.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../BrainTumor/results/swin/base/confusion_matrix.png}
+    \caption{Matriz de confusión de Swin-T en la fase base.}
+    \label{fig:swin_base_cm}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../BrainTumor/results/swin/base/roc_curve.png}
+    \caption{Curva ROC de Swin-T en la fase base.}
+    \label{fig:swin_base_roc}
+\end{minipage}
+\end{figure}
+
+\subparagraph{Fase Optimizada (Early Stopping y optimización adaptativa):}
+Se aplicaron ReduceLROnPlateau (factor~0.5, paciencia~3) y early stopping con paciencia de~7 épocas sobre val\_loss. El entrenamiento se detuvo en la época~23, preservando los pesos de la época~16 (mejor val\_loss de 0.0068). Las métricas finales se muestran en la Tabla~\ref{tab:swin_opt_metrics}.
+
+\begin{table}[H]
+\centering
+\caption{Métricas de evaluación de Swin-T en la fase optimizada.}
+\label{tab:swin_opt_metrics}
+\begin{tabular}{lc}
+\hline
+Métrica & Valor \\
+\hline
+Accuracy  & 99.60\% \\
+Balanced Accuracy & 99.58\% \\
+Precisión & 99.61\% \\
+Recall (Sensibilidad) & 99.71\% \\
+Especificidad & 99.44\% \\
+F1-Score & 99.66\% \\
+MCC & 0.9917 \\
+AUC-ROC & 0.9999 \\
+\hline
+\end{tabular}
+\end{table}
+
+El early stopping redujo las épocas de 30 a 23, el consumo de memoria GPU bajó de 3.56~GB a 2.51~GB, y todas las métricas principales mejoraron: el accuracy subió de 99.26\% a 99.60\%, el F1-Score de 99.37\% a 99.66\%, y el AUC-ROC alcanzó 0.9999. Esto demuestra que la optimización adaptativa no solo acelera el entrenamiento sino que también estabiliza la convergencia y eleva el rendimiento.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../BrainTumor/results/swin/optimized/confusion_matrix.png}
+    \caption{Matriz de confusión de Swin-T optimizado.}
+    \label{fig:swin_opt_cm}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../BrainTumor/results/swin/optimized/roc_curve.png}
+    \caption{Curva ROC de Swin-T optimizado.}
+    \label{fig:swin_opt_roc}
+\end{minipage}
+\end{figure}
+
+\paragraph{Impacto de las Ventanas Desplazadas:}
+
+La matriz de confusión del Swin-T optimizado (Figura~\ref{fig:swin_opt_cm}) revela una distribución de errores notablemente baja, con solo 4 falsos negativos y 3 falsos positivos sobre 876 muestras de prueba. Esta precisión se atribuye al mecanismo de autoatención con ventanas desplazadas (Shifted Window Attention), que permite al modelo capturar relaciones locales dentro de parches adyacentes mientras mantiene conexiones entre ventanas a través del desplazamiento en capas sucesivas. A diferencia de la atención global de ViT-B/16, que procesa todos los pares de parches simultáneamente, Swin-T restringe la autoatención a ventanas de tamaño fijo ($7\times7$), reduciendo la complejidad de $O(N^2)$ a $O(M^2\cdot N/M^2)=O(M^2\cdot\lceil H/7\rceil\cdot\lceil W/7\rceil)$, donde $M=49$. Esta aproximación local resulta particularmente efectiva en imágenes médicas de tumor cerebral, donde las características discriminativas están concentradas en regiones anatómicas locales y no requieren dependencias de largo alcance entre extremos opuestos de la imagen.
+
+\end{subsection}
