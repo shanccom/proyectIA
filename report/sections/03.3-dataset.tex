@@ -1,16 +1,16 @@
 \subsection{Dataset}
 \label{sec:dataset}
 
-Para el desarrollo del presente proyecto se empleará el dataset \textit{Brain Tumor MRI Datasets}, publicado por Shashin en Kaggle \cite{Shashin2024}. Dicho dataset contiene un total de 8764 imágenes de resonancia magnética (MRI) del cerebro organizadas para un problema de clasificación binaria.
+Para el desarrollo del presente proyecto se empleará el dataset \textit{Brain Tumor MRI Datasets}, publicado por Shashin en Kaggle \cite{Shashin2024}. Dicho dataset contiene un total de 8764 imágenes de resonancia magnética (MRI) del cerebro organizadas para un problema de cla\-si\-fi\-ca\-ción binaria.
 
-Las imágenes se encuentran clasificadas en dos categorías: Yes (pacientes con presencia de tumor cerebral) y No (pacientes sin evidencia de tumor cerebral).
+Las imágenes se encuentran clasificadas en dos ca\-te\-go\-rí\-as: Yes (pacientes con presencia de tumor cerebral) y No (pacientes sin evidencia de tumor cerebral).
 
 \begin{figure}[H]
 \centering
 \begin{minipage}{0.34\textwidth}
     \centering
     \includegraphics[width=\textwidth]{images/Si_Tumor.png}\par
-    \caption{Ejemplo de imagen perteneciente a la categoría ``Yes''.}
+    \caption{Ejemplo de imagen perteneciente a la ca\-te\-go\-rí\-a ``Yes''.}
     \label{fig:si_tumor}
 \end{minipage}
 
@@ -19,16 +19,16 @@ Las imágenes se encuentran clasificadas en dos categorías: Yes (pacientes con 
 \begin{minipage}{0.34\textwidth}
     \centering
     \includegraphics[width=\textwidth]{images/No_Tumor.png}
-    \caption{Ejemplo de imagen perteneciente a la categoría ``No''.}
+    \caption{Ejemplo de imagen perteneciente a la ca\-te\-go\-rí\-a ``No''.}
     \label{fig:no_tumor}
 \end{minipage}
 \end{figure}
 
-Asimismo, el conjunto de datos se encuentra dividido en un 80\% para entrenamiento y un 20\% para pruebas, lo que facilita el desarrollo y la evaluación de modelos de aprendizaje profundo. Debido a que se trata de un conjunto de imágenes, el dataset no presenta atributos tabulares convencionales; cada registro está conformado por una imagen de resonancia magnética y su correspondiente etiqueta de clasificación.
+Asimismo, el conjunto de datos se encuentra dividido en un 80\,\% para entrenamiento y un 20\,\% para pruebas, lo que facilita el desarrollo y la e\-va\-lua\-ción de modelos de aprendizaje profundo. Debido a que se trata de un conjunto de imágenes, el dataset no presenta atributos tabulares convencionales; cada registro está conformado por una imagen de resonancia magnética y su correspondiente etiqueta de clasificación.
 
 \begin{table}[H]
 \centering
-\caption{Descripción de las variables del dataset.}
+\caption{Des\-crip\-ción de las variables del dataset.}
 \label{tab:variables}
 \begin{tabular}{lp{0.65\columnwidth}}
 \hline
@@ -41,7 +41,7 @@ Train/Test & Indica si la imagen pertenece al conjunto de entrenamiento o de pru
 \end{tabular}
 \end{table}
 
-El conjunto de datos está organizado en dos subconjuntos: entrenamiento y prueba. La distribución de imágenes por clase se muestra en la Tabla~\ref{tab:distribucion}.
+El conjunto de datos está organizado en dos subconjuntos: entrenamiento y prueba. La dis\-tri\-bu\-ción de imágenes por clase se muestra en la Tabla~\ref{tab:distribucion}.
 
 \begin{table}[H]
 \centering
@@ -58,7 +58,7 @@ Total & 3586 & 5178 & 8764 \\
 \end{tabular}
 \end{table}
 
-Con el propósito de conocer la distribución de las imágenes, se realizó un análisis considerando la cantidad de muestras por clase y por conjunto de datos.
+Con el pro\-pó\-si\-to de conocer la dis\-tri\-bu\-ción de las imágenes, se realizó un análisis considerando la cantidad de muestras por clase y por conjunto de datos.
 
 \begin{figure}[H]
 \centering
@@ -67,7 +67,7 @@ Con el propósito de conocer la distribución de las imágenes, se realizó un a
 \label{fig:dist_clases}
 \end{figure}
 
-Como se observa en la Figura~\ref{fig:dist_clases}, el conjunto de datos presenta 5178 imágenes con tumor (59.1\%) y 3586 imágenes sin tumor (40.9\%). Esto evidencia un ligero desbalance entre ambas clases, aunque la diferencia no es lo suficientemente grande como para impedir el entrenamiento del modelo.
+Como se observa en la Figura~\ref{fig:dist_clases}, el conjunto de datos presenta 5178 imágenes con tumor (59.1\,\%) y 3586 imágenes sin tumor (40.9\,\%). Esto evidencia un ligero desbalance entre ambas clases, aunque la diferencia no es lo suficientemente grande como para impedir el entrenamiento del modelo.
 
 \begin{figure}[H]
 \centering
@@ -76,7 +76,7 @@ Como se observa en la Figura~\ref{fig:dist_clases}, el conjunto de datos present
 \label{fig:dist_conjunto}
 \end{figure}
 
-La Figura~\ref{fig:dist_conjunto} muestra que la distribución de imágenes se mantiene tanto en el conjunto de entrenamiento como en el de prueba. En ambos casos, la clase Tumor posee una mayor cantidad de muestras que la clase No Tumor, conservando una proporción similar entre los dos subconjuntos.
+La Figura~\ref{fig:dist_conjunto} muestra que la dis\-tri\-bu\-ción de imágenes se mantiene tanto en el conjunto de entrenamiento como en el de prueba. En ambos casos, la clase Tumor posee una mayor cantidad de muestras que la clase No Tumor, conservando una proporción similar entre los dos subconjuntos.
 
 \begin{figure}[H]
 \centering
@@ -85,4 +85,4 @@ La Figura~\ref{fig:dist_conjunto} muestra que la distribución de imágenes se m
 \label{fig:dist_porcentual}
 \end{figure}
 
-La Figura~\ref{fig:dist_porcentual} muestra la distribución porcentual de las imágenes del dataset. Se observa que el 59.1\% corresponde a imágenes con tumor cerebral, mientras que el 40.9\% pertenece a imágenes sin tumor. Esta diferencia indica un ligero desbalance entre las clases, el cual debe considerarse durante el entrenamiento del modelo.
+La Figura~\ref{fig:dist_porcentual} muestra la dis\-tri\-bu\-ción porcentual de las imá\-genes del dataset. Se observa que el 59.1\,\% corresponde a imá\-genes con presencia de tumor cerebral, mientras que el 40.9\,\% pertenece a imá\-genes sin tumor. Esta diferencia evidencia un ligero desbalance entre las clases, el cual debe considerarse durante el entrenamiento del modelo.
