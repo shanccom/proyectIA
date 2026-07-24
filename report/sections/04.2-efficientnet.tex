@@ -1,9 +1,7 @@
 \subsection{EfficientNet-B0}
 
-\paragraph{Evaluación Cuantitativa de EfficientNet-B0:}
-
-\subparagraph{Fase Base (30 épocas fijas):}
-El modelo EfficientNet-B0 fue entrenado durante 30 épocas fijas con una tasa de aprendizaje constante de $1\times10^{-4}$. Las métricas de evaluación sobre el conjunto de prueba se detallan en la Tabla~\ref{tab:effnet_base_metrics}. A pesar de ser la arquitectura convolucional más compacta del estudio con aproximadamente 5.3~M de parámetros, el modelo alcanzó un accuracy de 99.66\%, un F1-Score de 99.71\% y un AUC-ROC de 0.9997, superando en rendimiento base a modelos más complejos y profundos.
+\paragraph{Fase Base:}
+En la fase base, el modelo EfficientNet-B0 fue entrenado durante 30 épocas con una tasa de aprendizaje fija de $1\times10^{-4}$. Las métricas obtenidas en el conjunto de prueba se presentan en la Tabla~\ref{tab:effnet_base_metrics}. A pesar de ser la arquitectura más compacta del estudio con solo 4.0~M de parámetros, el AUC-ROC de 0.9998 y el accuracy de 99.66\% superaron a modelos más complejos.
 
 \begin{table}[H]
 \centering
@@ -20,32 +18,34 @@ Recall (Sensibilidad) & 99.61\% \\
 Especificidad & 99.72\% \\
 F1-Score & 99.71\% \\
 MCC & 0.9928 \\
-AUC-ROC & 0.9997 \\
+AUC-ROC & 0.9998 \\
 \hline
 \end{tabular}
 \end{table}
 
-Durante esta fase, la pérdida de entrenamiento descendió de forma constante, alcanzando una convergencia acelerada gracias al escalamiento compuesto de ancho, profundidad y resolución propio de EfficientNet. La pérdida de validación alcanzó su punto mínimo en las etapas intermedias del entrenamiento; no obstante, al mantenerse la tasa de aprendizaje fija durante 30 épocas, se registraron ligeras fluctuaciones asintóticas en las últimas épocas.
+La pérdida de entrenamiento descendió de forma constante, alcanzando una convergencia acelerada gracias al escalamiento compuesto de EfficientNet. La pérdida de validación alcanzó su punto mínimo en las etapas intermedias del entrenamiento, con ligeras fluctuaciones asintóticas en las épocas finales debido a la tasa de aprendizaje fija. El mejor accuracy de validación se registró en la época~24 con 99.71\%.
 
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.45\textwidth}
+\begin{minipage}{0.48\columnwidth}
     \centering
-    \includegraphics[width=\textwidth]{../BrainTumor/results/efficientnet_b0/base/confusion_matrix.png}
+    \includegraphics[width=\columnwidth]{../BrainTumor/results/efficientnet_b0/base/confusion_matrix.png}
     \caption{Matriz de confusión de EfficientNet-B0 en la fase base.}
     \label{fig:effnet_base_cm}
 \end{minipage}
 \hfill
-\begin{minipage}{0.45\textwidth}
+\begin{minipage}{0.48\columnwidth}
     \centering
-    \includegraphics[width=\textwidth]{../BrainTumor/results/efficientnet_b0/base/roc_curve.png}
+    \includegraphics[width=\columnwidth]{../BrainTumor/results/efficientnet_b0/base/roc_curve.png}
     \caption{Curva ROC de EfficientNet-B0 en la fase base.}
     \label{fig:effnet_base_roc}
 \end{minipage}
 \end{figure}
 
-\subparagraph{Fase Optimizada (Early Stopping y optimización adaptativa):}
-En la fase optimizada se incorporaron ReduceLROnPlateau, early stopping con paciencia de 7 épocas sobre val\_loss, data augmentation y precisión mixta (AMP). El entrenamiento se detuvo automáticamente en la época~14 tras registrar 7 épocas consecutivas sin mejora en la pérdida de validación, preservando los pesos óptimos de la época~7 (mejor val\_loss de 0.0106 y val\_acc de 99.71\%). Las métricas finales en el conjunto de prueba se resumen en la Tabla~\ref{tab:effnet_opt_metrics}.
+\paragraph{Fase Optimizada:}
+En la fase optimizada, se implementaron técnicas de regularización como reducción de tasa de aprendizaje (ReduceLROnPlateau) y early stopping con paciencia de 7 épocas sobre el val\_loss, junto con data augmentation y precisión mixta (AMP). El entrenamiento se detuvo en la época~14, preservando los pesos de la época~7 (mejor val\_loss de 0.0106).
+
+El modelo optimizado alcanzó las métricas reportadas en la Tabla~\ref{tab:effnet_opt_metrics}. Con 99.90\% de precisión y 99.86\% de especificidad, el modelo minimizó los falsos positivos a solo 1 caso sobre 717 muestras sanas.
 
 \begin{table}[H]
 \centering
@@ -55,39 +55,33 @@ En la fase optimizada se incorporaron ReduceLROnPlateau, early stopping con paci
 \hline
 Métrica & Valor \\
 \hline
-Accuracy  & 99.60\% \\
-Balanced Accuracy & 99.66\% \\
-Precisión & 100.00\% \\
-Recall (Sensibilidad) & 99.32\% \\
-Especificidad & 100.00\% \\
-F1-Score & 99.66\% \\
-MCC & 0.9916 \\
+Accuracy  & 99.83\% \\
+Balanced Accuracy & 99.83\% \\
+Precisión & 99.90\% \\
+Recall (Sensibilidad) & 99.81\% \\
+Especificidad & 99.86\% \\
+F1-Score & 99.86\% \\
+MCC & 0.9965 \\
 AUC-ROC & 0.9998 \\
 \hline
 \end{tabular}
 \end{table}
 
-El resultado más destacado de la fase optimizada fue la obtención de un 100.00\% de precisión y especificidad, logrando cero falsos positivos ($FP = 0$) en la clasificación de resonancias de pacientes sanos. La introducción de data augmentation y la detención temprana permitieron reducir drásticamente el tiempo total de entrenamiento y prevenir el sobreajuste, manteniendo un rendimiento diagnóstico clínicamente idóneo.
+El resultado más destacado fue la mínima tasa de error, con solo 1 falso positivo sobre 717 muestras sanas y 2 falsos negativos sobre 1035 casos tumorales. Esta alta precisión sitúa a EfficientNet-B0 como un modelo de referencia para evitar diagnósticos erróneos en pacientes sin la enfermedad. La introducción de data augmentation y early stopping permitió reducir el tiempo de entrenamiento y prevenir el sobreajuste. Las matrices de confusión (Figuras~\ref{fig:effnet_base_cm} y \ref{fig:effnet_opt_cm}) reflejan este comportamiento, y la curva ROC (Figura~\ref{fig:effnet_opt_roc}) confirma un AUC-ROC de 0.9998.
 
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.45\textwidth}
+\begin{minipage}{0.48\columnwidth}
     \centering
-    \includegraphics[width=\textwidth]{../BrainTumor/results/efficientnet_b0/optimized/confusion_matrix.png}
+    \includegraphics[width=\columnwidth]{../BrainTumor/results/efficientnet_b0/optimized/confusion_matrix.png}
     \caption{Matriz de confusión de EfficientNet-B0 optimizado.}
     \label{fig:effnet_opt_cm}
 \end{minipage}
 \hfill
-\begin{minipage}{0.45\textwidth}
+\begin{minipage}{0.48\columnwidth}
     \centering
-    \includegraphics[width=\textwidth]{../BrainTumor/results/efficientnet_b0/optimized/roc_curve.png}
+    \includegraphics[width=\columnwidth]{../BrainTumor/results/efficientnet_b0/optimized/roc_curve.png}
     \caption{Curva ROC de EfficientNet-B0 optimizado.}
     \label{fig:effnet_opt_roc}
 \end{minipage}
 \end{figure}
-
-\paragraph{Matriz de Confusión y Curvas de Aprendizaje:}
-
-El análisis del comportamiento de pérdida y convergencia ratifica la alta eficiencia de la arquitectura EfficientNet-B0. En la fase base, el modelo demostró una velocidad de aprendizaje rápida, donde train\_loss y val\_loss disminuyeron casi en paralelo. En la fase optimizada, la aplicación de data augmentation actuó como un regularizador efectivo: la pérdida de entrenamiento se estabilizó en 0.0023 en la época~14 y val\_loss alcanzó 0.0106 en la época de convergencia óptima, deteniendo el proceso de forma automática sin desperdiciar recursos computacionales.
-
-Las matrices de confusión (Figuras~\ref{fig:effnet_base_cm} y \ref{fig:effnet_opt_cm}) reflejan un comportamiento diagnóstico altamente deseable en oncología. En la fase base se registraron 2 falsos positivos y 4 falsos negativos. En la fase optimizada, el modelo eliminó por completo las falsas alarmas, reduciendo a 0 los falsos positivos sobre 717 muestras sanas evaluadas, al tiempo que limitó los falsos negativos a solo 7 sobre 1035 casos tumorales. Esta propiedad de cero falsos positivos en la Fase 2 sitúa a EfficientNet-B0 como un modelo de referencia para evitar tratamientos innecesarios o diagnósticos erróneos en pacientes sin la enfermedad. La curva ROC (Figura~\ref{fig:effnet_opt_roc}) confirma un área bajo la curva de 0.9998.

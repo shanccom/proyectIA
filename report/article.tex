@@ -165,17 +165,11 @@
 %%
 
 \begin{abstract}
-%% Text of abstract
-Resumen aqui.
+Este estudio presenta una evaluación comparativa de cinco arquitecturas de deep learning: ResNet-50, EfficientNet-B0, ViT-B/16, Swin Transformer y CoAtNet, para la clasificación binaria de tumores cerebrales en imágenes de resonancia magnética. Se empleó un dataset público de 8764 imágenes, con partición estricta previa a cualquier aumento de datos para evitar data leakage. Cada modelo se evaluó en dos fases: base (30 épocas, tasa fija) y optimizada (early stopping, ReduceLROnPlateau, data augmentation). EfficientNet-B0 alcanzó 99.60\,\% de accuracy y 0.9998 de AUC-ROC con solo 4.0\,M de parámetros, mientras que Swin-T obtuvo el AUC-ROC más alto (0.9999). ViT-B/16, pese a ser el modelo más grande (85.8\,M), presentó el menor rendimiento debido a sobreajuste. Los resultados demuestran que las arquitecturas con sesgos convolucionales o atención local son más adecuadas para conjuntos de datos médicos de tamaño moderado.
 \end{abstract}
 
 \begin{keyword}
-%% keywords here, in the form: keyword \sep keyword
-
-%% MSC codes here, in the form: \MSC code \sep code
-%% or \MSC[2008] code \sep code (2000 is the default)
-
-Palabras clave 1 \sep Palabra clave 2 \sep Palabra clave 3 \sep Palabra clave 4 \sep Palabra clave 5.
+clasificación de tumores cerebrales \sep deep learning \sep EfficientNet \sep Swin Transformer \sep resonancia magnética
 \end{keyword}
 
 
