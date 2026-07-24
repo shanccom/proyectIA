@@ -1,7 +1,7 @@
 \subsection{CoAtNet}
 
 \paragraph{Fase Base:}
-En la fase base, el modelo CoAtNet fue entrenado durante 30 épocas con una tasa de aprendizaje fija de $1\times10^{-4}$, alcanzando una accuracy en el conjunto de prueba de 99.43\%, una precisión de 99.71\% y un recall de 99.32\%. La métrica F1 obtenida fue de 99.52\%, mientras que el coeficiente MCC alcanzó 0.9882. El área bajo la curva ROC (AUC-ROC) fue de 0.9996, lo que indica una capacidad de discriminación casi perfecta entre las clases tumor y no tumor.
+En la fase base, el modelo CoAtNet fue entrenado durante 30 épocas con una tasa de aprendizaje fija de $1\times10^{-4}$. Las métricas obtenidas en el conjunto de prueba se presentan en la Tabla~\ref{tab:coatnet_base_metrics}. El AUC-ROC de 0.9996 indica una capacidad de discriminación casi perfecta entre las clases tumor y no tumor.
 
 \begin{table}[H]
 \centering
@@ -47,7 +47,7 @@ En cuanto a la evolución de las métricas de validación, el modelo alcanzó su
 \paragraph{Fase Optimizada:}
 En la fase optimizada, se implementaron técnicas de regularización como reducción de tasa de aprendizaje (ReduceLROnPlateau) y early stopping con paciencia de 7 épocas sobre el val\_loss. El entrenamiento se detuvo en la época 13, preservando los pesos del mejor modelo.
 
-El modelo optimizado alcanzó una accuracy de 99.37\%, una precisión de 99.61\% y un recall de 99.32\%. El F1-Score obtenido fue de 99.47\%, mientras que el AUC-ROC alcanzó 0.9999, superando ligeramente a la fase base en esta métrica. La pérdida de validación mínima fue de 0.00399, inferior a la alcanzada en la fase base.
+El modelo optimizado alcanzó las métricas reportadas en la Tabla~\ref{tab:coatnet_opt_metrics}. El AUC-ROC alcanzó 0.9999, superando ligeramente a la fase base, y la pérdida de validación mínima fue de 0.00399, inferior a la obtenida previamente.
 
 \begin{table}[H]
 \centering
