@@ -3,11 +3,7 @@
 
 Para el desarrollo del presente proyecto se empleará el dataset \textit{Brain Tumor MRI Datasets}, publicado por Shashin en Kaggle \cite{Shashin2024}. Dicho dataset contiene un total de 8764 imágenes de resonancia magnética (MRI) del cerebro organizadas para un problema de clasificación binaria.
 
-Las imágenes se encuentran clasificadas en dos categorías:
-\begin{itemize}
-    \item \textbf{Yes}: pacientes con presencia de tumor cerebral.
-    \item \textbf{No}: pacientes sin evidencia de tumor cerebral.
-\end{itemize}
+Las imágenes se encuentran clasificadas en dos categorías: Yes (pacientes con presencia de tumor cerebral) y No (pacientes sin evidencia de tumor cerebral).
 
 \begin{figure}[H]
 \centering
@@ -36,7 +32,7 @@ Asimismo, el conjunto de datos se encuentra dividido en un 80\% para entrenamien
 \label{tab:variables}
 \begin{tabular}{lp{0.65\columnwidth}}
 \hline
-\textbf{Variable} & \textbf{Descripción} \\
+Variable & Descripción \\
 \hline
 Imagen MRI & Imagen de resonancia magnética cerebral. \\
 Clase      & Etiqueta de la imagen (``Yes'' o ``No''). \\
@@ -53,11 +49,11 @@ El conjunto de datos está organizado en dos subconjuntos: entrenamiento y prueb
 \label{tab:distribucion}
 \begin{tabular}{lrrr}
 \hline
-\textbf{Conjunto} & \textbf{No Tumor} & \textbf{Tumor} & \textbf{Total} \\
+Conjunto & No Tumor & Tumor & Total \\
 \hline
 Train     & 2869 & 4143 & 7012 \\
 Test      &  717 & 1035 & 1752 \\
-\textbf{Total} & 3586 & 5178 & \textbf{8764} \\
+Total & 3586 & 5178 & 8764 \\
 \hline
 \end{tabular}
 \end{table}
@@ -71,7 +67,7 @@ Con el propósito de conocer la distribución de las imágenes, se realizó un a
 \label{fig:dist_clases}
 \end{figure}
 
-Como se observa en la Figura~\ref{fig:dist_clases}, el conjunto de datos presenta \textbf{5178 imágenes con tumor (59.1\%)} y \textbf{3586 imágenes sin tumor (40.9\%)}. Esto evidencia un ligero desbalance entre ambas clases, aunque la diferencia no es lo suficientemente grande como para impedir el entrenamiento del modelo.
+Como se observa en la Figura~\ref{fig:dist_clases}, el conjunto de datos presenta 5178 imágenes con tumor (59.1\%) y 3586 imágenes sin tumor (40.9\%). Esto evidencia un ligero desbalance entre ambas clases, aunque la diferencia no es lo suficientemente grande como para impedir el entrenamiento del modelo.
 
 \begin{figure}[H]
 \centering
@@ -80,7 +76,7 @@ Como se observa en la Figura~\ref{fig:dist_clases}, el conjunto de datos present
 \label{fig:dist_conjunto}
 \end{figure}
 
-La Figura~\ref{fig:dist_conjunto} muestra que la distribución de imágenes se mantiene tanto en el conjunto de entrenamiento como en el de prueba. En ambos casos, la clase \textbf{Tumor} posee una mayor cantidad de muestras que la clase \textbf{No Tumor}, conservando una proporción similar entre los dos subconjuntos.
+La Figura~\ref{fig:dist_conjunto} muestra que la distribución de imágenes se mantiene tanto en el conjunto de entrenamiento como en el de prueba. En ambos casos, la clase Tumor posee una mayor cantidad de muestras que la clase No Tumor, conservando una proporción similar entre los dos subconjuntos.
 
 \begin{figure}[H]
 \centering
