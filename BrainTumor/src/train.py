@@ -10,8 +10,7 @@ from tqdm import tqdm
 from config import (
     EPOCHS, LEARNING_RATE, WEIGHT_DECAY, DEVICE,
     EARLY_STOPPING_PATIENCE, LR_SCHEDULER_FACTOR,
-    LR_SCHEDULER_PATIENCE, MIXED_PRECISION, USE_AUGMENTATION,
-    STOP_ACCURACY, CONVERGENCE_WINDOW, MIN_DELTA, MIN_LR,
+    LR_SCHEDULER_PATIENCE, MIXED_PRECISION, USE_AUGMENTATION, MIN_LR,
 )
 from dataset import get_dataloaders
 from metrics import compute_metrics
@@ -29,7 +28,7 @@ def train_one_epoch(model, loader, criterion, optimizer, scaler, use_amp):
         optimizer.zero_grad()
 
         if use_amp:
-            with torch.cuda.amp.autocast():
+            with torch.amp.autocast('cuda'):
                 outputs = model(images)
                 loss = criterion(outputs, labels)
             scaler.scale(loss).backward()
@@ -102,9 +101,6 @@ def main():
 
     stopper = ConvergenceStopper(
         patience=EARLY_STOPPING_PATIENCE if is_optimized else 999,
-        stop_accuracy=STOP_ACCURACY if is_optimized else 1.0,
-        convergence_window=CONVERGENCE_WINDOW if is_optimized else 999,
-        min_delta=MIN_DELTA if is_optimized else 0.0,
         min_lr=MIN_LR if is_optimized else 0.0,
     )
 
@@ -116,10 +112,9 @@ def main():
     print(f"Device:     {DEVICE}")
     print(f"Parada por:")
     if is_optimized:
-        print(f"  - Precision objetivo >= {STOP_ACCURACY}")
-        print(f"  - Convergencia (ventana={CONVERGENCE_WINDOW}, delta={MIN_DELTA})")
-        print(f"  - Early stopping (paciencia={EARLY_STOPPING_PATIENCE})")
+        print(f"  - Early stopping (paciencia={EARLY_STOPPING_PATIENCE} en val_loss)")
         print(f"  - LR minimo < {MIN_LR}")
+        print(f"  - Maximo de epocas ({max_epochs})")
     else:
         print(f"  - Maximo de epocas ({max_epochs})")
     print()
@@ -139,7 +134,7 @@ def main():
             patience=LR_SCHEDULER_PATIENCE
         )
 
-    scaler = torch.cuda.amp.GradScaler() if use_amp else None
+    scaler = torch.amp.GradScaler('cuda') if use_amp else None
 
     history = {
         "train_loss": [], "val_loss": [], "val_metrics": [],
