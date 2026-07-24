@@ -1,0 +1,6 @@
+{
+  "model": "resnet50",
+  "total_params": 23512130,
+  "trainable_params": 23512130,
+  "gpu_memory_gb": 1.6887521743774414
+}
