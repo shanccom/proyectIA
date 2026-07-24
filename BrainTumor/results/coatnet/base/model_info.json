@@ -1,0 +1,6 @@
+{
+  "model": "coatnet",
+  "total_params": 26668100,
+  "trainable_params": 26668100,
+  "gpu_memory_gb": 5.328550338745117
+}
