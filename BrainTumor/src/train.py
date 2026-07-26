@@ -1,14 +1,16 @@
 import argparse
 import json
+import random
 from pathlib import Path
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 
 from config import (
-    EPOCHS, LEARNING_RATE, WEIGHT_DECAY, DEVICE,
+    EPOCHS, LEARNING_RATE, WEIGHT_DECAY, DEVICE, SEED, NUM_CLASSES,
     EARLY_STOPPING_PATIENCE, LR_SCHEDULER_FACTOR,
     LR_SCHEDULER_PATIENCE, MIXED_PRECISION, USE_AUGMENTATION, MIN_LR,
 )
@@ -21,6 +23,8 @@ from utils import Timer, gpu_memory_usage, ConvergenceStopper
 def train_one_epoch(model, loader, criterion, optimizer, scaler, use_amp):
     model.train()
     total_loss = 0.0
+    correct = 0
+    total = 0
 
     for images, labels in tqdm(loader, desc="  Train"):
         images, labels = images.to(DEVICE), labels.to(DEVICE)
@@ -41,8 +45,11 @@ def train_one_epoch(model, loader, criterion, optimizer, scaler, use_amp):
             optimizer.step()
 
         total_loss += loss.item()
+        preds = outputs.argmax(dim=1)
+        correct += (preds == labels).sum().item()
+        total += labels.size(0)
 
-    return total_loss / len(loader)
+    return total_loss / len(loader), correct / total
 
 
 @torch.no_grad()
@@ -88,6 +95,12 @@ def main():
     )
     args = parser.parse_args()
 
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
+    random.seed(SEED)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
     model_name = args.model
     phase = args.phase
     is_optimized = phase == 2
@@ -110,6 +123,7 @@ def main():
     print(f"Augment:    {'Si' if use_augment else 'No'}")
     print(f"AMP:        {'Si' if use_amp else 'No'}")
     print(f"Device:     {DEVICE}")
+    print(f"Seed:       {SEED}")
     print(f"Parada por:")
     if is_optimized:
         print(f"  - Early stopping (paciencia={EARLY_STOPPING_PATIENCE} en val_loss)")
@@ -123,7 +137,11 @@ def main():
     model = get_model(model_name).to(DEVICE)
     model_info = print_model_info(model, model_name)
 
-    criterion = nn.CrossEntropyLoss()
+    class_counts = np.bincount(train_loader.dataset.targets)
+    class_weights = 1.0 / class_counts
+    class_weights = class_weights / class_weights.sum() * NUM_CLASSES
+    class_weights = torch.tensor(class_weights, dtype=torch.float).to(DEVICE)
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE,
                            weight_decay=WEIGHT_DECAY if is_optimized else 0.0)
 
@@ -137,8 +155,8 @@ def main():
     scaler = torch.amp.GradScaler('cuda') if use_amp else None
 
     history = {
-        "train_loss": [], "val_loss": [], "val_metrics": [],
-        "lr": [], "epoch_time": [],
+        "train_loss": [], "train_acc": [], "val_loss": [],
+        "val_metrics": [], "lr": [], "epoch_time": [],
     }
     best_val_loss = float("inf")
     timer = Timer()
@@ -151,18 +169,19 @@ def main():
 
         print(f"Epoch {epoch:2d}/{max_epochs}  |  LR: {current_lr:.2e}")
 
-        train_loss = train_one_epoch(model, train_loader, criterion,
-                                     optimizer, scaler, use_amp)
+        train_loss, train_acc = train_one_epoch(model, train_loader, criterion,
+                                                optimizer, scaler, use_amp)
         val_loss, val_metrics = validate(model, val_loader, criterion)
 
         epoch_time = timer.elapsed()
         history["epoch_time"].append(epoch_time)
         history["train_loss"].append(train_loss)
+        history["train_acc"].append(train_acc)
         history["val_loss"].append(val_loss)
         history["val_metrics"].append(val_metrics)
 
         print(
-            f"  → Train Loss: {train_loss:.4f}  |  "
+            f"  -> Train Loss: {train_loss:.4f}  |  Train Acc: {train_acc:.4f}  |  "
             f"Val Loss: {val_loss:.4f}  |  "
             f"Val Acc: {val_metrics['accuracy']:.4f}  |  "
             f"Tiempo: {timer.elapsed_str()}"
@@ -174,14 +193,14 @@ def main():
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             torch.save(model.state_dict(), results_dir / "best_model.pth")
-            print("  ✓ Nuevo mejor modelo guardado.")
+            print("  [OK] Nuevo mejor modelo guardado.")
 
         reasons = stopper.check(
             epoch, val_loss, val_metrics["accuracy"], current_lr
         )
         if reasons:
             for r in reasons:
-                print(f"  ⏹ {r}")
+                print(f"  [STOP] {r}")
             stop_reason = "; ".join(reasons)
             break
 

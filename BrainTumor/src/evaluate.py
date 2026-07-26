@@ -1,13 +1,15 @@
 import argparse
 import json
+import random
 from pathlib import Path
 import time
 
+import numpy as np
 import torch
 from sklearn.metrics import ConfusionMatrixDisplay, roc_curve
 import matplotlib.pyplot as plt
 
-from config import DEVICE
+from config import DEVICE, SEED
 from dataset import get_dataloaders
 from metrics import compute_metrics
 from models import get_model, print_model_info
@@ -47,6 +49,10 @@ def main():
         help="Fase del entrenamiento (1=base, 2=optimizado).",
     )
     args = parser.parse_args()
+
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
+    random.seed(SEED)
 
     model_name = args.model
     phase_tag = "optimized" if args.phase == 2 else "base"
