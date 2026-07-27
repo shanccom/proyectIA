@@ -93,6 +93,10 @@ def main():
         "--epochs", type=int, default=None,
         help="Override EPOCHS from config.py (límite máximo).",
     )
+    parser.add_argument(
+        "--scratch", action="store_true", default=False,
+        help="Entrenar desde cero sin pesos preentrenados.",
+    )
     args = parser.parse_args()
 
     torch.manual_seed(SEED)
@@ -108,7 +112,14 @@ def main():
     use_amp = MIXED_PRECISION and is_optimized and DEVICE == "cuda"
     use_augment = USE_AUGMENTATION and is_optimized
 
-    phase_tag = "optimized" if is_optimized else "base"
+    scratch = args.scratch
+    if scratch:
+        phase_tag = "scratch"
+        is_optimized = False
+        use_augment = False
+        use_amp = False
+    else:
+        phase_tag = "optimized" if is_optimized else "base"
     results_dir = Path("results") / model_name / phase_tag
     results_dir.mkdir(parents=True, exist_ok=True)
 
@@ -118,12 +129,16 @@ def main():
     )
 
     print(f"\nModelo:     {model_name}")
-    print(f"Fase:       {phase} ({'Optimizado' if is_optimized else 'Base'})")
+    if scratch:
+        print(f"Fase:       Scratch (sin pesos preentrenados)")
+    else:
+        print(f"Fase:       {phase} ({'Optimizado' if is_optimized else 'Base'})")
     print(f"Epocas max: {max_epochs}")
     print(f"Augment:    {'Si' if use_augment else 'No'}")
     print(f"AMP:        {'Si' if use_amp else 'No'}")
     print(f"Device:     {DEVICE}")
     print(f"Seed:       {SEED}")
+    print(f"Pretrained: {'Si' if not scratch else 'No (desde cero)'}")
     print(f"Parada por:")
     if is_optimized:
         print(f"  - Early stopping (paciencia={EARLY_STOPPING_PATIENCE} en val_loss)")
@@ -134,7 +149,7 @@ def main():
     print()
 
     train_loader, val_loader, _ = get_dataloaders(augment=use_augment)
-    model = get_model(model_name).to(DEVICE)
+    model = get_model(model_name, pretrained=not scratch).to(DEVICE)
     model_info = print_model_info(model, model_name)
 
     class_counts = np.bincount(train_loader.dataset.targets)

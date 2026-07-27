@@ -2,5 +2,5 @@
   "model": "vit",
   "total_params": 85800194,
   "trainable_params": 85800194,
-  "gpu_memory_gb": 3.3287224769592285
+  "gpu_memory_gb": 3.2155699729919434
 }

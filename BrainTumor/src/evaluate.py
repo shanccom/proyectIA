@@ -35,6 +35,69 @@ def plot_roc_curve(y_true, y_prob, save_path):
     plt.close()
 
 
+def plot_learning_curves(history, save_path):
+    epochs = range(1, len(history["train_loss"]) + 1)
+    has_acc = "train_acc" in history and history.get("train_acc")
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+    best_epoch = history["val_loss"].index(min(history["val_loss"])) + 1
+    best_val = min(history["val_loss"])
+
+    ax1.plot(epochs, history["train_loss"], "b-", linewidth=1.5,
+             label="Train Loss")
+    ax1.plot(epochs, history["val_loss"], "r-", linewidth=1.5,
+             label="Val Loss")
+    ax1.axvline(x=best_epoch, color="gray", linestyle="--", alpha=0.6)
+    ax1.scatter(best_epoch, best_val, color="red", s=60, zorder=5,
+                label=f"Mejor (ep {best_epoch}: {best_val:.4f})")
+    ax1.set_xlabel("Epoch")
+    ax1.set_ylabel("Loss")
+    ax1.set_title("Evolucion de la perdida")
+    ax1.legend()
+    ax1.grid(alpha=0.3)
+
+    if has_acc:
+        best_acc = max(history["val_metrics"], key=lambda m: m["accuracy"])
+        best_acc_epoch = history["val_metrics"].index(best_acc) + 1
+
+        train_accs = history["train_acc"]
+        val_accs = [m["accuracy"] for m in history["val_metrics"]]
+
+        ax2.plot(epochs, train_accs, "b-", linewidth=1.5,
+                 label="Train Acc")
+        ax2.plot(epochs, val_accs, "r-", linewidth=1.5,
+                 label="Val Acc")
+        ax2.axvline(x=best_epoch, color="gray", linestyle="--", alpha=0.6)
+        ax2.set_xlabel("Epoch")
+        ax2.set_ylabel("Accuracy")
+        ax2.set_title("Evolucion del accuracy")
+        ax2.legend()
+        ax2.grid(alpha=0.3)
+    else:
+        val_accs = [m["accuracy"] for m in history["val_metrics"]]
+        ax2.plot(epochs, val_accs, "r-", linewidth=1.5,
+                 label="Val Acc")
+        ax2.axvline(x=best_epoch, color="gray", linestyle="--", alpha=0.6)
+        ax2.set_xlabel("Epoch")
+        ax2.set_ylabel("Accuracy")
+        ax2.set_title("Evolucion del accuracy de validacion")
+        ax2.legend()
+        ax2.grid(alpha=0.3)
+
+    stop_reason = history.get("stop_reason", "")
+    epochs_exec = history.get("epochs_executed", len(epochs))
+    fig.suptitle(
+        f"Curvas de aprendizaje — {epochs_exec} epocas\n"
+        f"Stop: {stop_reason}",
+        fontsize=11, fontweight="bold"
+    )
+    plt.tight_layout()
+    plt.savefig(save_path, bbox_inches="tight", dpi=150)
+    plt.close()
+    print(f"  Curvas de aprendizaje: {save_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Evaluate a trained brain-tumor classification model."
@@ -48,6 +111,10 @@ def main():
         "--phase", type=int, default=2, choices=[1, 2],
         help="Fase del entrenamiento (1=base, 2=optimizado).",
     )
+    parser.add_argument(
+        "--scratch", action="store_true", default=False,
+        help="Cargar modelo de la carpeta scratch (sin pesos preentrenados).",
+    )
     args = parser.parse_args()
 
     torch.manual_seed(SEED)
@@ -55,7 +122,10 @@ def main():
     random.seed(SEED)
 
     model_name = args.model
-    phase_tag = "optimized" if args.phase == 2 else "base"
+    if args.scratch:
+        phase_tag = "scratch"
+    else:
+        phase_tag = "optimized" if args.phase == 2 else "base"
     results_dir = Path("results") / model_name / phase_tag
 
     if not (results_dir / "best_model.pth").exists():
@@ -65,7 +135,7 @@ def main():
 
     _, _, test_loader = get_dataloaders(augment=False)
 
-    model = get_model(model_name).to(DEVICE)
+    model = get_model(model_name, pretrained=not args.scratch).to(DEVICE)
     state_dict = torch.load(results_dir / "best_model.pth",
                             map_location=DEVICE)
     model.load_state_dict(state_dict)
@@ -126,7 +196,14 @@ def main():
                           results_dir / "confusion_matrix.png")
     plot_roc_curve(all_labels, all_probs,
                    results_dir / "roc_curve.png")
-    print(f"\nGráficas guardadas en {results_dir}")
+
+    history_path = results_dir / "history.json"
+    if history_path.exists():
+        with open(history_path) as f:
+            history = json.load(f)
+        plot_learning_curves(history, results_dir / "learning_curves.png")
+
+    print(f"\nGraficas guardadas en {results_dir}")
 
 
 if __name__ == "__main__":
