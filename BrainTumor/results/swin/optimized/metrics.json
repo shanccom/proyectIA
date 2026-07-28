@@ -1,13 +1,13 @@
 {
-  "accuracy": 0.9960045662100456,
-  "balanced_accuracy": 0.9959755826410366,
-  "precision": 0.9970986460348162,
-  "recall": 0.996135265700483,
-  "specificity": 0.99581589958159,
-  "sensitivity": 0.996135265700483,
-  "f1": 0.9966167230546158,
-  "mcc": 0.9917393677270152,
-  "roc_auc": 0.9994865886443111,
+  "accuracy": 0.9970958373668926,
+  "balanced_accuracy": 0.9980519480519481,
+  "precision": 1.0,
+  "recall": 0.9961038961038962,
+  "specificity": 1.0,
+  "sensitivity": 0.9961038961038962,
+  "f1": 0.9980481457384516,
+  "mcc": 0.9924059862962128,
+  "roc_auc": 0.999861735222952,
   "total_params": 27520892,
-  "inference_time_ms_per_batch": 149.0
+  "inference_time_ms_per_batch": 160.7
 }
