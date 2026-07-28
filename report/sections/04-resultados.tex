@@ -13,26 +13,29 @@
 
 \subsection{Análisis Comparativo}
 
-La Tabla~\ref{tab:comparative_summary} presenta una comparación directa de los resultados de las cinco arquitecturas en su fase optimizada. Swin-T alcanza el accuracy más alto (99.60\%) junto con el AUC-ROC más elevado (0.9999), mientras que EfficientNet-B0 logra el mejor F1-Score (99.86\%) y la mayor precisión (99.90\%) con solo 1 falso positivo, siendo el modelo más eficiente en parámetros (4.0~M). CoAtNet y ResNet50 presentan resultados intermedios, con accuracies de 99.37\% y 99.54\% respectivamente. ViT-B/16, pese a ser el modelo más grande (85.8~M de parámetros), obtiene el rendimiento más bajo (99.37\% de accuracy), aunque la incorporación de pesos balanceados por clase permitió reducir la brecha respecto a las arquitecturas convolucionales. La diferencia de 0.46~pp con EfficientNet-B0 (4.0~M) evidencia que los transformers puros requieren conjuntos de datos sustancialmente mayores para aprovechar su capacidad.
+La Tabla~\ref{tab:comparative_summary} presenta una comparación directa de los resultados de las cinco arquitecturas. Para ResNet50, EfficientNet-B0, Swin-T y CoAtNet se reportan los resultados de su fase optimizada (con pesos preentrenados de ImageNet). Para ViT-B/16 se reporta el resultado del entrenamiento desde cero (scratch), por ser la métrica libre de sobreajuste y la más representativa del desempeño real del modelo sin aprovechar conocimiento externo. Swin-T alcanza el accuracy más alto (99.60\%) con el AUC-ROC más elevado (0.9999), mientras que EfficientNet-B0 logra el mejor F1-Score (99.86\%) con solo 4.0~M de parámetros. ViT-B/16, entrenado sin pesos preentrenados, obtiene 97.26\% de accuracy —el más bajo del estudio—, evidenciando que los transformers puros sin sesgos convolucionales requieren volúmenes de datos masivos para alcanzar rendimientos comparables a las CNNs. La brecha de 2.11~pp entre el ViT desde cero (97.26\%) y su versión con transfer learning (99.37\%) cuantifica el valor real del preentrenamiento en ImageNet para este dominio.
 
 \begin{table}[H]
 \centering
-\caption{Comparación de resultados en fase optimizada.}
+\caption{Comparación de resultados. ViT-B\slash{}16 se reporta en configuración scratch (sin pesos preentrenados) por ser la métrica libre de sobreajuste; el resto de modelos en fase optimizada.}
 \label{tab:comparative_summary}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{lccccc}
 \hline
-Métrica & ResNet50 & ENet-B0 & ViT-B/16 & Swin-T & CoAtNet \\
+Métrica & ResNet50 & ENet-B0 & ViT-B/16$^*$ & Swin-T & CoAtNet \\
 \hline
-Accuracy (\%) & 99.54 & 99.83 & 99.37 & 99.60 & 99.37 \\
-F1-Score (\%) & 99.61 & 99.86 & 99.47 & 99.66 & 99.47 \\
-AUC-ROC & 0.9998 & 0.9998 & 0.9997 & 0.9999 & 0.9999 \\
+Accuracy (\%) & 99.54 & 99.83 & 97.26 & 99.60 & 99.37 \\
+F1-Score (\%) & 99.61 & 99.86 & 97.68 & 99.66 & 99.47 \\
+AUC-ROC & 0.9998 & 0.9998 & 0.9946 & 0.9999 & 0.9999 \\
 Parámetros (M) & 23.5 & 4.0 & 85.8 & 27.5 & 26.7 \\
-Inferencia (ms) & 108.4 & 43.9 & 341.2 & 164.3 & 157.3 \\
-FP/FN & 2/6 & 1/2 & 5/6 & 4/3 & 4/7 \\
+Inferencia (ms) & 108.4 & 43.9 & 202.6 & 164.3 & 157.3 \\
+FP/FN & 2/6 & 1/2 & 24/24 & 4/3 & 4/7 \\
 \hline
 \end{tabular}
 }
+\\[4pt]
+{\small $^*$ ViT-B/16 entrenado desde cero (scratch), sin pesos preentrenados de ImageNet.}
+\end{table}
 \end{table}
 
-En términos de eficiencia computacional, EfficientNet-B0 destaca con solo 43.9~ms de inferencia por batch y 4.0~M de parámetros, siendo ideal para entornos con recursos limitados. Swin-T ofrece el mejor balance entre precisión y eficiencia entre los transformers, superando ampliamente a ViT-B/16 en todas las métricas con 68\% menos parámetros y 52\% menos tiempo de inferencia. Estos resultados confirman que las arquitecturas con sesgos convolucionales o mecanismos de atención local son más adecuadas para la clasificación de tumores cerebrales en conjuntos de datos de tamaño moderado.
+En términos de eficiencia computacional, EfficientNet-B0 destaca con solo 43.9~ms de inferencia por batch y 4.0~M de parámetros, siendo ideal para entornos con recursos limitados. Swin-T ofrece el mejor balance entre precisión y eficiencia entre los transformers. ViT-B/16, con 85.8~M de parámetros y entrenado desde cero, alcanza apenas 97.26\% con 48 errores de clasificación (24 FP, 24 FN), confirmando que los transformers puros sin sesgos convolucionales son inadecuados para datasets médicos de tamaño moderado sin recurrir al transfer learning. La diferencia de 2.37~pp entre ViT (97.26\%) y EfficientNet-B0 (99.83\%) con 95\% menos parámetros demuestra la superioridad de las arquitecturas convolucionales en este dominio.
