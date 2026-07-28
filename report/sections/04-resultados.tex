@@ -13,7 +13,7 @@
 
 \subsection{Análisis Comparativo}
 
-La Tabla~\ref{tab:comparative_summary} presenta una comparación directa de los resultados de las cinco arquitecturas en su fase optimizada. Swin-T alcanza el accuracy más alto (99.60\%) junto con el AUC-ROC más elevado (0.9999), mientras que EfficientNet-B0 logra el mejor F1-Score (99.86\%) y la mayor precisión (99.90\%) con solo 1 falso positivo, siendo el modelo más eficiente en parámetros (4.0~M). CoAtNet y ResNet50 presentan resultados intermedios, con accuracies de 99.37\% y 99.54\% respectivamente. ViT-B/16, pese a ser el modelo más grande (85.8~M de parámetros), obtiene el rendimiento más bajo (99.14\% de accuracy) debido a sobreajuste severo, evidenciando que los transformers puros requieren conjuntos de datos sustancialmente mayores para aprovechar su capacidad.
+La Tabla~\ref{tab:comparative_summary} presenta una comparación directa de los resultados de las cinco arquitecturas en su fase optimizada. Swin-T alcanza el accuracy más alto (99.60\%) junto con el AUC-ROC más elevado (0.9999), mientras que EfficientNet-B0 logra el mejor F1-Score (99.86\%) y la mayor precisión (99.90\%) con solo 1 falso positivo, siendo el modelo más eficiente en parámetros (4.0~M). CoAtNet y ResNet50 presentan resultados intermedios, con accuracies de 99.37\% y 99.54\% respectivamente. ViT-B/16, pese a ser el modelo más grande (85.8~M de parámetros), obtiene el rendimiento más bajo (99.37\% de accuracy), aunque la incorporación de pesos balanceados por clase permitió reducir la brecha respecto a las arquitecturas convolucionales. La diferencia de 0.46~pp con EfficientNet-B0 (4.0~M) evidencia que los transformers puros requieren conjuntos de datos sustancialmente mayores para aprovechar su capacidad.
 
 \begin{table}[H]
 \centering
@@ -24,12 +24,12 @@ La Tabla~\ref{tab:comparative_summary} presenta una comparación directa de los 
 \hline
 Métrica & ResNet50 & ENet-B0 & ViT-B/16 & Swin-T & CoAtNet \\
 \hline
-Accuracy (\%) & 99.54 & 99.83 & 99.14 & 99.60 & 99.37 \\
-F1-Score (\%) & 99.61 & 99.86 & 99.28 & 99.66 & 99.47 \\
-AUC-ROC & 0.9998 & 0.9998 & 0.9991 & 0.9999 & 0.9999 \\
+Accuracy (\%) & 99.54 & 99.83 & 99.37 & 99.60 & 99.37 \\
+F1-Score (\%) & 99.61 & 99.86 & 99.47 & 99.66 & 99.47 \\
+AUC-ROC & 0.9998 & 0.9998 & 0.9997 & 0.9999 & 0.9999 \\
 Parámetros (M) & 23.5 & 4.0 & 85.8 & 27.5 & 26.7 \\
 Inferencia (ms) & 108.4 & 43.9 & 341.2 & 164.3 & 157.3 \\
-FP/FN & 2/6 & 1/2 & 8/7 & 4/3 & 4/7 \\
+FP/FN & 2/6 & 1/2 & 5/6 & 4/3 & 4/7 \\
 \hline
 \end{tabular}
 }

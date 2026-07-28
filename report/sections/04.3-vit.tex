@@ -23,7 +23,7 @@ AUC-ROC & 0.9991 \\
 \end{tabular}
 \end{table}
 
-La pérdida de entrenamiento descendió de 0.1063 en la primera época a $2.38\times10^{-6}$ en la época~30, aproximándose a cero, lo que constituye un indicador de sobreajuste severo. La pérdida de validación alcanzó su mínimo en la época~5 con 0.0218; a partir de la época~8 se observó una tendencia ascendente sostenida hasta 0.0427 en la época~30, confirmando la degradación progresiva de la generalización. El mejor accuracy de validación fue de 99.43\%, registrado a partir de la época~7.
+La pérdida de entrenamiento descendió de 0.1063 en la primera época a $2.38\times10^{-6}$ en la época~30, aproximándose a cero, lo que constituye un indicador de sobreajuste severo. La pérdida de validación alcanzó su mínimo en la época~5 con 0.0218; a partir de la época~8 se observó una tendencia ascendente sostenida hasta 0.0427 en la época~30, confirmando la degradación progresiva de la generalización. La Figura~\ref{fig:vit_base_lc} muestra la divergencia entre train\_loss y val\_loss característica del sobreajuste en transformers puros.
 
 \begin{figure}[H]
 \centering
@@ -42,32 +42,39 @@ La pérdida de entrenamiento descendió de 0.1063 en la primera época a $2.38\t
 \end{minipage}
 \end{figure}
 
-\paragraph{Fase Optimizada:}
-En la fase optimizada, se implementaron ReduceLROnPlateau, early stopping con paciencia de 7 épocas sobre val\_loss, data augmentation y precisión mixta (AMP). El entrenamiento se detuvo en la época~14, preservando los pesos de la época~7 (mejor val\_loss de 0.0222).
+\begin{figure}[H]
+\centering
+    \includegraphics[width=0.95\columnwidth]{../BrainTumor/results/vit/base/learning_curves.png}
+    \caption{Curvas de aprendizaje de ViT-B\slash{}16 en la fase base. Se observa la divergencia entre train\_loss y val\_loss a partir de la época~5, indicativa de sobreajuste.}
+    \label{fig:vit_base_lc}
+\end{figure}
 
-El modelo optimizado alcanzó las métricas reportadas en la Tabla~\ref{tab:vit_opt_metrics}. Las métricas de prueba se mantuvieron prácticamente idénticas a las de la fase base, sugiriendo que las limitaciones de ViT-B/16 no provienen de la configuración del entrenamiento sino de propiedades arquitectónicas intrínsecas.
+\paragraph{Fase Optimizada:}
+En la fase optimizada se incorporaron pesos balanceados por clase en la función de pérdida (CrossEntropyLoss con pesos inversamente proporcionales a la frecuencia de cada clase), además de ReduceLROnPlateau, early stopping con paciencia de 7 épocas sobre val\_loss, data augmentation y precisión mixta (AMP). El entrenamiento se detuvo en la época~22, preservando los pesos de la época~15 (mejor val\_loss de 0.0133). La tasa de aprendizaje se redujo progresivamente de $1\times10^{-4}$ a $5\times10^{-5}$ y finalmente a $2.5\times10^{-5}$.
+
+Las métricas finales, presentadas en la Tabla~\ref{tab:vit_opt_metrics}, muestran una mejora significativa respecto a la fase base: el accuracy subió de 99.14\% a 99.37\%, el F1-Score de 99.28\% a 99.47\% y el MCC de 0.9823 a 0.9870. Los pesos por clase contribuyeron a reducir la asimetría entre falsos positivos y falsos negativos: la diferencia entre recall (99.42\%) y especificidad (99.30\%) se redujo de 0.68~pp en la fase base a 0.12~pp.
 
 \begin{table}[H]
 \centering
-\caption{Métricas de evaluación de ViT-B\slash{}16 en la fase optimizada.}
+\caption{Métricas de evaluación de ViT-B\slash{}16 en la fase optimizada (con pesos por clase).}
 \label{tab:vit_opt_metrics}
 \begin{tabular}{lc}
 \hline
 Métrica & Valor \\
 \hline
-Accuracy  & 99.14\% \\
-Balanced Accuracy & 99.10\% \\
-Precisión & 99.23\% \\
-Recall (Sensibilidad) & 99.32\% \\
-Especificidad & 98.88\% \\
-F1-Score & 99.28\% \\
-MCC & 0.9823 \\
-AUC-ROC & 0.9991 \\
+Accuracy  & 99.37\% \\
+Balanced Accuracy & 99.36\% \\
+Precisión & 99.52\% \\
+Recall (Sensibilidad) & 99.42\% \\
+Especificidad & 99.30\% \\
+F1-Score & 99.47\% \\
+MCC & 0.9870 \\
+AUC-ROC & 0.9997 \\
 \hline
 \end{tabular}
 \end{table}
 
-La fase optimizada redujo el tiempo por época de 215~s a 72~s y la memoria GPU de 4.82~GB a 3.33~GB. La incorporación de data augmentation atenuó parcialmente el sobreajuste: la pérdida de entrenamiento se mantuvo en 0.0040 en la época~14, cuatro órdenes de magnitud por encima del valor asintótico de la fase base. Sin embargo, la tendencia al sobreajuste persistió, activando el mecanismo de early stopping. Las matrices de confusión (Figuras~\ref{fig:vit_base_cm} y \ref{fig:vit_opt_cm}) muestran una distribución de errores con mayor proporción de falsos negativos, y las curvas ROC (Figura~\ref{fig:vit_opt_roc}) confirman un AUC-ROC de 0.9991.
+La incorporación de pesos balanceados por clase atenuó el sobreajuste observado en la fase base. La pérdida de entrenamiento en la mejor época se mantuvo en 0.0033 —tres órdenes de magnitud por encima del valor asintótico de la fase base ($2.38\times10^{-6}$)— mientras que la pérdida de validación alcanzó 0.0133, el valor más bajo registrado en cualquiera de las configuraciones evaluadas para ViT-B/16. La Figura~\ref{fig:vit_opt_lc} muestra que, si bien la divergencia train/val no se eliminó por completo, el early stopping preservó los pesos óptimos antes de que la degradación se acentuara. Esto demuestra que las limitaciones de ViT-B/16 en este dominio son atenuables mediante regularización, pero no eliminables sin modificar la arquitectura subyacente.
 
 \begin{figure}[H]
 \centering
@@ -84,4 +91,11 @@ La fase optimizada redujo el tiempo por época de 215~s a 72~s y la memoria GPU 
     \caption{Curva ROC de ViT-B\slash{}16 optimizado.}
     \label{fig:vit_opt_roc}
 \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+    \includegraphics[width=0.95\columnwidth]{../BrainTumor/results/vit/optimized/learning_curves.png}
+    \caption{Curvas de aprendizaje de ViT-B\slash{}16 en la fase optimizada. Los pesos por clase y el early stopping atenúan el sobreajuste, preservando los pesos de la época~15 (val\_loss=0.0133).}
+    \label{fig:vit_opt_lc}
 \end{figure}
