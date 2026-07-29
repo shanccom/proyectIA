@@ -97,6 +97,10 @@ def main():
         "--scratch", action="store_true", default=False,
         help="Entrenar desde cero sin pesos preentrenados.",
     )
+    parser.add_argument(
+        "--normalized", action="store_true", default=False,
+        help="Usar pipeline de normalizacion estricta (elimina artefactos).",
+    )
     args = parser.parse_args()
 
     torch.manual_seed(SEED)
@@ -113,11 +117,20 @@ def main():
     use_augment = USE_AUGMENTATION and is_optimized
 
     scratch = args.scratch
-    if scratch:
+    normalized = args.normalized
+    if scratch and normalized:
+        phase_tag = "normalized_scratch"
+        is_optimized = False
+        use_augment = False
+        use_amp = False
+    elif scratch:
         phase_tag = "scratch"
         is_optimized = False
         use_augment = False
         use_amp = False
+    elif normalized:
+        phase_tag = "normalized"
+        is_optimized = True
     else:
         phase_tag = "optimized" if is_optimized else "base"
     results_dir = Path("results") / model_name / phase_tag
@@ -131,11 +144,14 @@ def main():
     print(f"\nModelo:     {model_name}")
     if scratch:
         print(f"Fase:       Scratch (sin pesos preentrenados)")
+    elif normalized:
+        print(f"Fase:       Normalizado (pipeline anti-artefactos)")
     else:
         print(f"Fase:       {phase} ({'Optimizado' if is_optimized else 'Base'})")
     print(f"Epocas max: {max_epochs}")
     print(f"Augment:    {'Si' if use_augment else 'No'}")
     print(f"AMP:        {'Si' if use_amp else 'No'}")
+    print(f"Normalized: {'Si (sin artefactos)' if normalized else 'No'}")
     print(f"Device:     {DEVICE}")
     print(f"Seed:       {SEED}")
     print(f"Pretrained: {'Si' if not scratch else 'No (desde cero)'}")
@@ -148,7 +164,8 @@ def main():
         print(f"  - Maximo de epocas ({max_epochs})")
     print()
 
-    train_loader, val_loader, _ = get_dataloaders(augment=use_augment)
+    train_loader, val_loader, _ = get_dataloaders(augment=use_augment,
+                                                    normalized=normalized)
     model = get_model(model_name, pretrained=not scratch).to(DEVICE)
     model_info = print_model_info(model, model_name)
 

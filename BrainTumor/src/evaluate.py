@@ -115,6 +115,10 @@ def main():
         "--scratch", action="store_true", default=False,
         help="Cargar modelo de la carpeta scratch (sin pesos preentrenados).",
     )
+    parser.add_argument(
+        "--normalized", action="store_true", default=False,
+        help="Usar pipeline de normalizacion estricta.",
+    )
     args = parser.parse_args()
 
     torch.manual_seed(SEED)
@@ -122,8 +126,14 @@ def main():
     random.seed(SEED)
 
     model_name = args.model
-    if args.scratch:
+    scratch = args.scratch
+    normalized = args.normalized
+    if scratch and normalized:
+        phase_tag = "normalized_scratch"
+    elif scratch:
         phase_tag = "scratch"
+    elif normalized:
+        phase_tag = "normalized"
     else:
         phase_tag = "optimized" if args.phase == 2 else "base"
     results_dir = Path("results") / model_name / phase_tag
@@ -133,7 +143,7 @@ def main():
         print("Ejecuta primero el entrenamiento.")
         return
 
-    _, _, test_loader = get_dataloaders(augment=False)
+    _, _, test_loader = get_dataloaders(augment=False, normalized=normalized)
 
     model = get_model(model_name, pretrained=not args.scratch).to(DEVICE)
     state_dict = torch.load(results_dir / "best_model.pth",
