@@ -120,12 +120,10 @@ def main():
     normalized = args.normalized
     if scratch and normalized:
         phase_tag = "normalized_scratch"
-        is_optimized = False
         use_augment = False
         use_amp = False
     elif scratch:
         phase_tag = "scratch"
-        is_optimized = False
         use_augment = False
         use_amp = False
     elif normalized:
