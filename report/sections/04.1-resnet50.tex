@@ -1,7 +1,7 @@
 \subsection{ResNet50}
 
 \paragraph{Entrenamiento desde cero (scratch + normalizado):}
-ResNet50 fue entrenado desde cero con el pipeline de normalización estricta (CenterCrop cuadrado, ecualización de histograma, RGB forzado) durante 30 épocas con tasa de aprendizaje fija de $1\times10^{-4}$, sin data augmentation ni early stopping. Las métricas obtenidas sobre el conjunto de prueba se presentan en la Tabla~\ref{tab:resnet_scratch_metrics}.
+La arquitectura ResNet50 fue sometida a entrenamiento desde cero con el pipeline de normalización rigurosa (CenterCrop cuadrado, ecualización de histograma, conversión RGB obligatoria) durante 30 épocas empleando una tasa de aprendizaje constante de $1\times10^{-4}$, sin expansión sintética de datos ni detención anticipada. Las métricas de desempeño obtenidas en el conjunto de prueba se detallan en la Tabla~\ref{tab:resnet_scratch_metrics}.
 
 \begin{table}[H]
 \centering
@@ -23,7 +23,7 @@ AUC-ROC & 0.9980 \\
 \end{tabular}
 \end{table}
 
-La arquitectura residual de 23.5M de parámetros alcanzó una convergencia estable sin signos de sobreajuste. La pérdida de entrenamiento y validación se mantuvieron cercanas durante todo el entrenamiento, con el mejor modelo preservado en la época~20 (val\_loss de 0.0553). Las curvas de aprendizaje muestran un descenso paralelo de train\_loss y val\_loss, confirmando que las conexiones residuales facilitan un aprendizaje efectivo incluso sin pesos preentrenados.
+La estructura residual con 23.5M de parámetros logró una convergencia equilibrada sin indicios de sobreajuste paramétrico. La pérdida de entrenamiento y validación permanecieron próximas a lo largo del entrenamiento, con el modelo óptimo preservado en la época~20 (val\_loss de 0.0553). Las curvas de aprendizaje demuestran un descenso paralelo de train\_loss y val\_loss, corroborando que las conexiones residuales facilitan un aprendizaje efectivo incluso sin inicialización mediante pesos preentrenados.
 
 \begin{figure}[H]
 \centering

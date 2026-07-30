@@ -1,7 +1,7 @@
 \subsection{Swin Transformer}
 
 \paragraph{Entrenamiento desde cero (scratch + normalizado):}
-Swin-T fue entrenado desde cero con el pipeline de normalización estricta durante 30 épocas con tasa de aprendizaje inicial de $1\times10^{-4}$, reducida por ReduceLROnPlateau en las épocas finales. Las métricas obtenidas se presentan en la Tabla~\ref{tab:swin_scratch_metrics}.
+Swin-T fue sometida a entrenamiento desde cero con el pipeline de normalización rigurosa durante 30 épocas con tasa de aprendizaje inicial de $1\times10^{-4}$, posteriormente modulada mediante ReduceLROnPlateau en las fases tardías. Las métricas de desempeño obtenidas se detallan en la Tabla~\ref{tab:swin_scratch_metrics}.
 
 \begin{table}[H]
 \centering
@@ -23,7 +23,7 @@ AUC-ROC & 0.9955 \\
 \end{tabular}
 \end{table}
 
-Swin-T superó a ViT-B/16 por 0.58 puntos porcentuales (96.32\% vs. 95.74\%) con 68\% menos parámetros (27.5M vs. 85.8M). El mecanismo de atención local por ventanas desplazadas ($7\times7$) demostró ser más eficiente que la atención global de ViT-B/16, permitiendo al modelo concentrarse en regiones anatómicas locales relevantes. Las curvas de aprendizaje (Figura~\ref{fig:swin_scratch_lc}) confirman un entrenamiento estable sin sobreajuste, con el mejor modelo registrado en la época~29 (val\_loss de 0.0583).
+Swin-T superó a ViT-B/16 por 0.58 puntos porcentuales (96.32\% vs. 95.74\%) utilizando 68\% menos parámetros (27.5M vs. 85.8M). El mecanismo de atención local con ventanas desplazadas ($7\times7$) demostró ser más eficiente que la atención global característica de ViT-B/16, permitiendo que el modelo se concentre en regiones anatómicas locales de relevancia clínica. Las curvas de aprendizaje (Figura~\ref{fig:swin_scratch_lc}) corroboran un entrenamiento equilibrado carente de sobreajuste, con el modelo óptimo registrado en la época~29 (val\_loss de 0.0583).
 
 \begin{figure}[H]
 \centering

@@ -1,7 +1,7 @@
 \subsection{EfficientNet-B0}
 
 \paragraph{Entrenamiento desde cero (scratch + normalizado):}
-EfficientNet-B0, la arquitectura más compacta del estudio con solo 4.0M de parámetros, fue entrenada desde cero con el pipeline de normalización estricta durante 30 épocas con tasa de aprendizaje fija de $1\times10^{-4}$. Las métricas obtenidas se presentan en la Tabla~\ref{tab:effnet_scratch_metrics}.
+La arquitectura EfficientNet-B0, caracterizada por su reducida magnitud con solo 4.0M de parámetros, fue entrenada desde cero aplicando el pipeline de normalización rigurosa durante 30 épocas con tasa de aprendizaje constante de $1\times10^{-4}$. Las métricas de desempeño obtenidas se presentan en la Tabla~\ref{tab:effnet_scratch_metrics}.
 
 \begin{table}[H]
 \centering
@@ -23,7 +23,7 @@ AUC-ROC & 0.9919 \\
 \end{tabular}
 \end{table}
 
-A pesar de contar con 95\% menos parámetros que ViT-B/16, EfficientNet-B0 supera al transformer puro en 1.26 puntos porcentuales de accuracy. El modelo convergió rápidamente gracias a su compound scaling, alcanzando el mejor val\_loss de 0.0682 en la época~10. Las curvas de aprendizaje muestran un entrenamiento saludable sin divergencia significativa entre train y validación. Con solo 55.28~ms de inferencia por batch, EfficientNet-B0 es el modelo más rápido del estudio, posicionándose como la opción más eficiente para entornos con recursos computacionales limitados.
+A pesar de contener el 95\% menos parámetros en comparación con ViT-B/16, EfficientNet-B0 supera al transformador puro por 1.26 puntos porcentuales de accuracy. El modelo alcanzó convergencia acelerada mediante su estrategia de escalamiento compuesto, logrando el val\_loss óptimo de 0.0682 en la época~10. Las curvas de aprendizaje exhiben un entrenamiento robusto sin desviación pronunciada entre los conjuntos de entrenamiento y validación. Con una latencia de solo 55.28~ms por lote, EfficientNet-B0 se posiciona como la opción más computacionalmente ágil del estudio, constituyéndose en la alternativa más favorable para ambientes con capacidad computacional restringida.
 
 \begin{figure}[H]
 \centering

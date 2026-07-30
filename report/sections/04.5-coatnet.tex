@@ -1,7 +1,7 @@
 \subsection{CoAtNet}
 
 \paragraph{Entrenamiento desde cero (scratch + normalizado):}
-CoAtNet, el modelo híbrido que combina capas convolucionales MBConv con bloques de atención Transformer, fue entrenado desde cero con el pipeline de normalización estricta durante 30 épocas. Las métricas obtenidas se presentan en la Tabla~\ref{tab:coatnet_scratch_metrics}.
+CoAtNet, la arquitectura híbrida que integra capas convolucionales MBConv con módulos de atención Transformer, fue entrenada desde cero con el pipeline de normalización rigurosa durante 30 épocas. Las métricas de desempeño obtenidas se presentan en la Tabla~\ref{tab:coatnet_scratch_metrics}.
 
 \begin{table}[H]
 \centering
@@ -23,7 +23,7 @@ AUC-ROC & 0.9952 \\
 \end{tabular}
 \end{table}
 
-CoAtNet obtuvo el mejor desempeño del estudio con 98.35\% de accuracy, superando a ViT-B/16 por 2.61 puntos porcentuales con 69\% menos parámetros (26.7M vs. 85.8M). La combinación de convoluciones iniciales —que proveen sesgo inductivo de localidad— con atención global en etapas profundas resultó en el equilibrio óptimo entre capacidad de representación y eficiencia. Las curvas de aprendizaje muestran una convergencia excepcionalmente rápida: en la época~3 el modelo ya alcanzaba 96.62\% de accuracy en validación. El entrenamiento fue el más estable de todos los modelos evaluados, con una brecha train/val de solo 0.0000 en la mejor época (época~14, val\_loss de 0.0389), evidenciando ausencia total de sobreajuste.
+CoAtNet manifestó el rendimiento superior del estudio con 98.35\% de accuracy, excediendo a ViT-B/16 por 2.61 puntos porcentuales con 69\% menos parámetros (26.7M vs. 85.8M). La sinergia de convoluciones iniciales —que proporcionan sesgo inductivo de localidad— con atención global en etapas avanzadas generó el equilibrio óptimo entre capacidad representativa y eficiencia operacional. Las curvas de aprendizaje documentan una convergencia excepcionalmente rápida: en la época~3 el modelo ya superaba 96.62\% de exactitud en validación. El entrenamiento fue el más equilibrado de todas las arquitecturas evaluadas, con una diferencia train/val de solo 0.0000 en la época óptima (época~14, val\_loss de 0.0389), evidenciando ausencia total de sobreajuste paramétrico.
 
 \begin{figure}[H]
 \centering

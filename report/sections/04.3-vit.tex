@@ -1,7 +1,7 @@
 \subsection{ViT-B\slash{}16}
 
 \paragraph{Entrenamiento desde cero (scratch + normalizado):}
-ViT-B/16, el modelo con mayor capacidad del estudio (85.8M de parámetros), fue entrenado desde cero con el pipeline de normalización estricta durante 30 épocas con tasa de aprendizaje fija de $1\times10^{-4}$. Las métricas obtenidas se presentan en la Tabla~\ref{tab:vit_scratch_metrics}.
+La arquitectura ViT-B/16, que representa el modelo de mayor capacidad en esta investigación (85.8M de parámetros), fue sometida a entrenamiento desde cero con el pipeline de normalización rigurosa durante 30 épocas con tasa de aprendizaje constante de $1\times10^{-4}$. Las métricas de desempeño resultantes se presentan en la Tabla~\ref{tab:vit_scratch_metrics}.
 
 \begin{table}[H]
 \centering
@@ -23,7 +23,7 @@ AUC-ROC & 0.9892 \\
 \end{tabular}
 \end{table}
 
-ViT-B/16 obtuvo el accuracy más bajo del estudio (95.74\%), a pesar de triplicar en parámetros a Swin-T y tener 21 veces más parámetros que EfficientNet-B0. La ausencia de sesgos inductivos convolucionales obliga al modelo a aprender desde cero todas las relaciones espaciales, lo que resulta ineficiente con un dataset de solo 6893 imágenes. El entrenamiento, sin embargo, fue saludable: las curvas de aprendizaje (Figura~\ref{fig:vit_scratch_lc}) muestran convergencia paralela entre train y validación, sin la divergencia característica del sobreajuste observado en configuraciones con transfer learning.
+ViT-B/16 alcanzó la exactitud más baja del estudio (95.74\%), circunstancia notable considerando que triplicaba en parámetros a Swin-T y excedía 21 veces la capacidad de EfficientNet-B0. La carencia de sesgos inductivos convolucionales obliga al modelo a adquirir desde cero la totalidad de relaciones espaciales, resulta ineficiente con un dataset reducido de solo 6893 imágenes. El entrenamiento, no obstante, transcurrió de forma equilibrada: las curvas de aprendizaje (Figura~\ref{fig:vit_scratch_lc}) demuestran convergencia coordinada entre entrenamiento y validación, sin la divergencia característica del sobreajuste observado en configuraciones que aprovechan aprendizaje por transferencia.
 
 \begin{figure}[H]
 \centering

@@ -33,7 +33,8 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[english]{babel}     % Language
+\usepackage[spanish,es-noshorthands]{babel}     % Language
+\usepackage[T1]{fontenc}
 \usepackage{float}
 \usepackage{parskip}
 \usepackage[utf8]{inputenc}   % UTF-8 encoding
@@ -92,7 +93,6 @@
 %    ...
 
 % add words to TeX's hyphenation exception list
-%\hyphenation{author another created financial paper re-commend-ed Post-Script}
 
 % to be able to introduce multiple figures that occupy the width of the two columns.
 \usepackage{subfigure}
@@ -103,6 +103,8 @@
 
 \begin{document}
 
+\tolerance=1000
+\emergencystretch=3em
 
 \begin{frontmatter}
 
@@ -165,7 +167,7 @@
 %%
 
 \begin{abstract}
-Este estudio presenta una evaluación comparativa de cinco arquitecturas de deep learning: ResNet-50, EfficientNet-B0, ViT-B/16, Swin Transformer y CoAtNet, para la clasificación binaria de tumores cerebrales en imágenes de resonancia magnética. Se empleó un dataset público de 8764 imágenes, con partición estricta previa a cualquier aumento de datos para evitar data leakage. Cada modelo se evaluó en dos fases: base (30 épocas, tasa fija) y optimizada (early stopping, ReduceLROnPlateau, data augmentation). EfficientNet-B0 alcanzó 99.60\,\% de accuracy y 0.9998 de AUC-ROC con solo 4.0\,M de parámetros, mientras que Swin-T obtuvo el AUC-ROC más alto (0.9999). ViT-B/16, pese a ser el modelo más grande (85.8\,M), presentó el menor rendimiento debido a sobreajuste. Los resultados demuestran que las arquitecturas con sesgos convolucionales o atención local son más adecuadas para conjuntos de datos médicos de tamaño moderado.
+En el presente trabajo se lleva a cabo una evaluación comparativa de cinco arquitecturas de aprendizaje profundo —ResNet-50, EfficientNet-B0, ViT-B/16, Swin Transformer y CoAtNet— orientada a la clasificación binaria de tumores cerebrales mediante imágenes de resonancia magnética. Se empleó un dataset público integrado por 8764 imágenes, aplicando una estrategia rigurosa de partición anterior a toda expansión sintética de datos para evitar contaminación cruzada. Cada arquitectura fue evaluada en dos etapas: una etapa base (30 épocas, tasa de aprendizaje constante) y una etapa refinada (early stopping, ReduceLROnPlateau, data augmentation). EfficientNet-B0 logró 99.60\% de accuracy y 0.9998 de AUC-ROC utilizando solo 4.0\,M de parámetros, mientras que Swin-T alcanzó el AUC-ROC más elevado (0.9999). ViT-B/16, a pesar de contar con la mayor capacidad de parámetros (85.8\,M), exhibió el rendimiento más bajo derivado del sobreajuste. Los resultados evidencian que las arquitecturas dotadas de sesgos convolucionales o mecanismos de atención local resultan más apropiadas para conjuntos de datos médicos de magnitud moderada.
 \end{abstract}
 
 \begin{keyword}
@@ -184,7 +186,12 @@ clasificación de tumores cerebrales \sep deep learning \sep EfficientNet \sep S
 \input{sections/01-introduccion}
 \input{sections/02-related_work}
 \FloatBarrier
-\input{sections/03-material_methods}
+\section{Materiales y Metodos}
+\label{sec:material_methods}
+\input{sections/03.1-teoria}
+\input{sections/03.2-herramientas}
+\input{sections/03.3-dataset}
+\input{sections/03.4-metodologia}
 \input{sections/04-resultados}
 \input{sections/05-discusion}
 \input{sections/06-conclusiones}

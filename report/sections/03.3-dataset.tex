@@ -1,16 +1,16 @@
 \subsection{Dataset}
 \label{sec:dataset}
 
-Para el desarrollo del presente proyecto se empleará el dataset \textit{Brain Tumor MRI Datasets}, publicado por Shashin en Kaggle \cite{Shashin2024}. Dicho dataset contiene 8764 imá\-genes de resonancia magnética (MRI) del cerebro organizadas para un problema de cla\-si\-fi\-ca\-ción binaria.
+Este proyecto empleará el dataset denominado \textit{Brain Tumor MRI Datasets}, disponible públicamente en la plataforma Kaggle y publicado por Shashin \cite{Shashin2024}. Este conjunto de datos comprende 8764 imágenes de resonancia magnética cerebral estructuradas para una tarea de categorización binaria.
 
-Las imágenes se encuentran clasificadas en dos ca\-te\-go\-rí\-as: Yes (pacientes con presencia de tumor cerebral) y No (pacientes sin evidencia de tumor cerebral).
+Las imágenes se encuentran organizadas en dos categorías: Yes (sujetos que presentan tumor cerebral) y No (sujetos sin hallazgos tumorales).
 
 \begin{figure}[H]
 \centering
 \begin{minipage}{0.34\textwidth}
     \centering
     \includegraphics[width=\textwidth]{images/Si_Tumor.png}\par
-    \caption{Ejemplo de imagen perteneciente a la ca\-te\-go\-rí\-a ``Yes''.}
+    \caption{Ejemplar de imagen de la categoría ``Yes''.}
     \label{fig:si_tumor}
 \end{minipage}
 
@@ -19,12 +19,12 @@ Las imágenes se encuentran clasificadas en dos ca\-te\-go\-rí\-as: Yes (pacien
 \begin{minipage}{0.34\textwidth}
     \centering
     \includegraphics[width=\textwidth]{images/No_Tumor.png}
-    \caption{Ejemplo de imagen perteneciente a la ca\-te\-go\-rí\-a ``No''.}
+    \caption{Ejemplar de imagen de la categoría ``No''.}
     \label{fig:no_tumor}
 \end{minipage}
 \end{figure}
 
-Asimismo, el conjunto de datos se encuentra dividido en un 80\,\% para entrenamiento y un 20\,\% para pruebas, lo que facilita el desarrollo y la e\-va\-lua\-ción de modelos de aprendizaje profundo. Debido a que se trata de un conjunto de imágenes, el dataset no presenta atributos tabulares convencionales; cada registro está conformado por una imagen de resonancia magnética y su correspondiente etiqueta de clasificación.
+El conjunto se encuentra particionado en un 80\% destinado a entrenamiento y un 20\% reservado para validación, estrategia que facilita el desarrollo y la valoración de modelos de aprendizaje profundo. Considerando que se trata de un dataset de imágenes, carece de atributos tabulares convencionales; cada registro se compone de una imagen de resonancia magnética acompañada de su correspondiente etiqueta categórica.
 
 \begin{table}[H]
 \centering
@@ -41,7 +41,7 @@ Train/Test & Indica si la imagen pertenece al conjunto de entrenamiento o de pru
 \end{tabular}
 \end{table}
 
-El conjunto de datos está organizado en dos subconjuntos: entrenamiento y prueba. La dis\-tri\-bu\-ción de imágenes por clase se muestra en la Tabla~\ref{tab:distribucion}.
+La estructura del conjunto de datos se organiza en dos subgrupos distintos: entrenamiento y prueba. La caracterización del volumen de imágenes según categoría se presenta en la Tabla~\ref{tab:distribucion}.
 
 \begin{table}[H]
 \centering
@@ -58,7 +58,7 @@ Total & 3586 & 5178 & 8764 \\
 \end{tabular}
 \end{table}
 
-Con el pro\-pó\-si\-to de conocer la dis\-tri\-bu\-ción de las imá\-genes, se realizó un análisis considerando la cantidad de muestras por clase y por conjunto de datos.
+Con propósito de caracterizar la composición del conjunto, se efectuó un análisis considerando la cantidad de ejemplares por categoría y por partición.
 
 \begin{figure}[H]
 \centering
@@ -67,7 +67,7 @@ Con el pro\-pó\-si\-to de conocer la dis\-tri\-bu\-ción de las imá\-genes, se
 \label{fig:dist_clases}
 \end{figure}
 
-Como se observa en la Figura~\ref{fig:dist_clases}, el conjunto de datos presenta 5178 imágenes con tumor (59.1\,\%) y 3586 imágenes sin tumor (40.9\,\%). Esto evidencia un ligero desbalance entre ambas clases, aunque la diferencia no es lo suficientemente grande como para impedir el entrenamiento del modelo.
+Según se observa en la Figura~\ref{fig:dist_clases}, el conjunto contiene 5178 imágenes con tumor (59.1\%) y 3586 imágenes sin tumor (40.9\%). Esto indica un ligero desequilibrio entre categorías, aunque la magnitud de la diferencia no resulta lo suficientemente pronunciada para comprometer significativamente el entrenamiento.
 
 \begin{figure}[H]
 \centering
@@ -76,7 +76,7 @@ Como se observa en la Figura~\ref{fig:dist_clases}, el conjunto de datos present
 \label{fig:dist_conjunto}
 \end{figure}
 
-La Figura~\ref{fig:dist_conjunto} muestra que la dis\-tri\-bu\-ción de imágenes se mantiene tanto en el conjunto de entrenamiento como en el de prueba. En ambos casos, la clase Tumor posee una mayor cantidad de muestras que la clase No Tumor, conservando una proporción similar entre los dos subconjuntos.
+La Figura~\ref{fig:dist_conjunto} ilustra que la proporción de imágenes se mantiene consistente tanto en el subgrupo de entrenamiento como en el de prueba. En ambas particiones, la categoría Tumor exhibe una cantidad superior de muestras comparada con la categoría No Tumor, preservando una relación proporcional equiparable entre ambos subconjuntos.
 
 \begin{figure}[H]
 \centering
@@ -85,4 +85,4 @@ La Figura~\ref{fig:dist_conjunto} muestra que la dis\-tri\-bu\-ción de imágene
 \label{fig:dist_porcentual}
 \end{figure}
 
-La Figura~\ref{fig:dist_porcentual} muestra la dis\-tri\-bu\-ción porcentual de las imá\-genes del dataset. Se observa que el 59.1\,\% corresponde a imá\-genes con presencia de tumor cerebral, mientras que el 40.9\,\% pertenece a imá\-genes sin tumor. Esta diferencia evidencia un ligero desbalance entre las clases, el cual debe considerarse durante el entrenamiento del modelo.
+La Figura~\ref{fig:dist_porcentual} presenta la distribución porcentual de los ejemplares del dataset. Se aprecia que el 59.1\% corresponde a imágenes que presentan tumor cerebral, en tanto que el 40.9\% pertenece a imágenes sin tumor. Este diferencial revela un desequilibrio moderado entre categorías que requiere consideración durante las fases de entrenamiento.
