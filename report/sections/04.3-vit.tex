@@ -1,64 +1,33 @@
 \subsection{ViT-B\slash{}16}
 
-\paragraph{Entrenamiento desde cero (Scratch):}
-Para obtener una evaluación realista del desempeño de ViT-B/16 sin la influencia del sobreajuste introducido por el transfer learning, se entrenó el modelo desde cero con inicialización aleatoria de pesos (sin pesos preentrenados de ImageNet) durante 30 épocas con una tasa de aprendizaje fija de $1\times10^{-4}$, sin data augmentation ni early stopping. Las métricas obtenidas en el conjunto de prueba se presentan en la Tabla~\ref{tab:vit_scratch_metrics}.
+\paragraph{Entrenamiento desde cero (scratch + normalizado):}
+ViT-B/16, el modelo con mayor capacidad del estudio (85.8M de parámetros), fue entrenado desde cero con el pipeline de normalización estricta durante 30 épocas con tasa de aprendizaje fija de $1\times10^{-4}$. Las métricas obtenidas se presentan en la Tabla~\ref{tab:vit_scratch_metrics}.
 
 \begin{table}[H]
 \centering
-\caption{Métricas de evaluación de ViT-B\slash{}16 entrenado desde cero (scratch).}
+\caption{Métricas de ViT-B\slash{}16 entrenado desde cero con pipeline normalizado.}
 \label{tab:vit_scratch_metrics}
 \begin{tabular}{lc}
 \hline
 Métrica & Valor \\
 \hline
-Accuracy  & 97.26\% \\
-Balanced Accuracy & 97.17\% \\
-Precisión & 97.68\% \\
-Recall (Sensibilidad) & 97.68\% \\
-Especificidad & 96.65\% \\
-F1-Score & 97.68\% \\
-MCC & 0.9433 \\
-AUC-ROC & 0.9946 \\
+Accuracy  & 95.74\% \\
+Balanced Accuracy & 95.53\% \\
+Precisión & 97.38\% \\
+Recall (Sensibilidad) & 95.84\% \\
+Especificidad & 95.22\% \\
+F1-Score & 96.61\% \\
+MCC & 0.8916 \\
+AUC-ROC & 0.9892 \\
 \hline
 \end{tabular}
 \end{table}
 
-El entrenamiento desde cero alcanzó su mejor época en la época~10, con una pérdida de entrenamiento de 0.0542 y una pérdida de validación de 0.0798, valores muy cercanos entre sí que evidencian la ausencia de sobreajuste. La pérdida de validación inicial fue de 0.3366 y descendió progresivamente hasta 0.0798, sin mostrar la divergencia train/val característica de los modelos preentrenados. La Figura~\ref{fig:vit_scratch_lc} muestra curvas de aprendizaje paralelas entre train y validación, confirmando un entrenamiento saludable.
+ViT-B/16 obtuvo el accuracy más bajo del estudio (95.74\%), a pesar de triplicar en parámetros a Swin-T y tener 21 veces más parámetros que EfficientNet-B0. La ausencia de sesgos inductivos convolucionales obliga al modelo a aprender desde cero todas las relaciones espaciales, lo que resulta ineficiente con un dataset de solo 6893 imágenes. El entrenamiento, sin embargo, fue saludable: las curvas de aprendizaje (Figura~\ref{fig:vit_scratch_lc}) muestran convergencia paralela entre train y validación, sin la divergencia característica del sobreajuste observado en configuraciones con transfer learning.
 
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/vit/scratch/confusion_matrix.png}
-    \caption{Matriz de confusión de ViT-B\slash{}16 desde cero.}
-    \label{fig:vit_scratch_cm}
-\end{minipage}
-\hfill
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/vit/scratch/roc_curve.png}
-    \caption{Curva ROC de ViT-B\slash{}16 desde cero.}
-    \label{fig:vit_scratch_roc}
-\end{minipage}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-    \includegraphics[width=0.95\columnwidth]{../BrainTumor/results/vit/scratch/learning_curves.png}
-    \caption{Curvas de aprendizaje de ViT-B\slash{}16 desde cero. Train y validación convergen en paralelo sin divergencia, evidenciando ausencia de sobreajuste.}
+    \includegraphics[width=0.95\columnwidth]{../BrainTumor/results/vit/normalized_scratch/learning_curves.png}
+    \caption{Curvas de aprendizaje de ViT-B\slash{}16 desde cero con pipeline normalizado.}
     \label{fig:vit_scratch_lc}
 \end{figure}
-
-Este resultado de 97.26\% representa el desempeño real de ViT-B/16 sin aprovechar conocimiento externo. El dataset, con 7012 imágenes de entrenamiento, no es trivial: el modelo requiere aprender desde cero todas las representaciones visuales. La brecha de 2.11~pp hasta 99.37\% —obtenido con pesos preentrenados de ImageNet y regularización por pesos de clase— constituye la contribución real del transfer learning en este dominio.
-
-\paragraph{Comparación con transfer learning:}
-En contraste con el entrenamiento desde cero, las configuraciones con pesos preentrenados de ImageNet evidenciaron sobreajuste sistemático. En la fase base (30 épocas fijas, sin regularización), el modelo alcanzó 99.14\% de accuracy en test, pero la pérdida de entrenamiento colapsó a $2.38\times10^{-6}$ mientras la pérdida de validación aumentó de 0.0218 a 0.0427 entre las épocas~5 y~30, mostrando una divergencia severa. En la fase optimizada, la incorporación de pesos balanceados por clase en CrossEntropyLoss, ReduceLROnPlateau y early stopping (paciencia de 7 épocas) permitió elevar el accuracy a 99.37\% (F1-Score de 99.47\%, MCC de 0.9870) y reducir parcialmente el sobreajuste, con una pérdida de validación mínima de 0.0133 en la época~15. No obstante, incluso en esta configuración, la pérdida de entrenamiento descendió a 0.0033 —tres órdenes de magnitud por debajo de la pérdida de validación— y el train\_accuracy alcanzó el 100\% en épocas posteriores, activando el mecanismo de early stopping en la época~22. La Figura~\ref{fig:vit_opt_lc} muestra que la divergencia train/val, aunque atenuada respecto a la fase base, persiste incluso con regularización.
-
-\begin{figure}[H]
-\centering
-    \includegraphics[width=0.95\columnwidth]{../BrainTumor/results/vit/optimized/learning_curves.png}
-    \caption{Curvas de aprendizaje de ViT-B\slash{}16 con pesos preentrenados y pesos balanceados por clase. La divergencia train/val persiste a pesar de la regularización, aunque el early stopping preserva los pesos óptimos de la época~15.}
-    \label{fig:vit_opt_lc}
-\end{figure}
-
-Estos hallazgos confirman que ViT-B/16, al carecer de sesgos inductivos convolucionales, es inherentemente propenso al sobreajuste en datasets médicos de tamaño moderado, incluso con técnicas de regularización. El resultado desde cero (97.26\%) constituye la métrica más confiable del modelo, mientras que los resultados con transfer learning (>99\%) deben interpretarse con cautela debido al componente de sobreajuste.

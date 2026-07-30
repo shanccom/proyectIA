@@ -1,36 +1,18 @@
-\section{Discusión}
+\section{Discusion}
 \label{sec:discussion}
 
-\paragraph{Análisis de Sesgo Inductivo en Transformers Puros:}
+\paragraph{Analisis de Sesgo Inductivo en Arquitecturas de Deep Learning:}
 
-Los resultados de ViT-B/16 evidencian el impacto de la ausencia de sesgos inductivos inherentes a las arquitecturas puramente basadas en atención cuando se aplican sobre conjuntos de datos de imágenes médicas de tamaño moderado. A diferencia de las CNNs tradicionales, que incorporan sesgos de localidad y equivarianza traslacional a través de las operaciones de convolución, ViT-B/16 debe aprender estas regularidades exclusivamente a partir de los datos mediante su mecanismo de autoatención global. Con 85.8~M de parámetros —tres veces más que Swin-T y veinte veces más que EfficientNet-B0—, el modelo entrenado desde cero (scratch) alcanzó solo 97.26\% de accuracy, 2.37~pp por debajo de EfficientNet-B0 (99.83\%) que cuenta con apenas 4.0~M de parámetros.
+Los resultados obtenidos bajo condiciones controladas —todos los modelos entrenados desde cero con el mismo pipeline de normalizacion— revelan una jerarquia clara determinada por la presencia de sesgos inductivos convolucionales. CoAtNet (98.35\%), que combina etapas convolucionales MBConv con atencion Transformer, lidera el ranking al beneficiarse de las convoluciones en las primeras capas para extraer caracteristicas locales, mientras que la atencion en capas profundas modela dependencias de largo alcance. ResNet50 (97.48\%) y EfficientNet-B0 (97.00\%), arquitecturas puramente convolucionales, ocupan el segundo y tercer lugar respectivamente, demostrando que decadas de refinamiento en el diseno de CNNs producen modelos altamente eficientes incluso sin transfer learning.
 
-El experimento desde cero revela la magnitud real del problema: sin pesos preentrenados de ImageNet, ViT-B/16 produce 48 errores de clasificación (24 falsos positivos y 24 falsos negativos) sobre 1752 imágenes de prueba, mientras que EfficientNet-B0 comete solo 3 errores totales. La incorporación de transfer learning eleva el accuracy de ViT-B/16 a 99.37\%, pero introduce sobreajuste severo: la pérdida de entrenamiento colapsa a $2.38\times10^{-6}$ en fase base mientras la pérdida de validación aumenta de 0.0218 a 0.0427. Incluso con pesos balanceados por clase, el train\_accuracy alcanza el 100\% en épocas avanzadas mientras que el val\_loss diverge, confirmando que el modelo memoriza el conjunto de entrenamiento.
+En el extremo opuesto, ViT-B/16 (95.74\%) obtiene el peor desempeno a pesar de tener 85.8M de parametros —3.2 veces mas que CoAtNet y 21 veces mas que EfficientNet-B0—. La atencion global, que permite a cada parche relacionarse con todos los demas, se convierte en una desventaja cuando el volumen de datos es limitado: el modelo debe aprender desde cero que pixeles cercanos estan correlacionados (localidad) y que un mismo patron puede aparecer en cualquier posicion (equivarianza traslacional), conocimientos que las CNNs incorporan estructuralmente. Swin-T (96.32\%), con atencion restringida a ventanas locales de 7$\times$7, mitiga parcialmente esta deficiencia, superando a ViT-B/16 por 0.58 puntos porcentuales con 68\% menos parametros.
 
-Este comportamiento es consistente con la hipótesis de que los transformers puros requieren volúmenes de datos masivos (del orden de millones de imágenes, como ImageNet-21k o JFT-300M) para compensar la carencia de priors estructurales. Con un dataset de 7012 imágenes de entrenamiento —típico en aplicaciones médicas donde la obtención de datos anotados es costosa—, el mecanismo de atención global de ViT-B/16 tiende a modelar correlaciones espurias entre parches distantes en lugar de enfocarse en las regiones anatómicas localmente relevantes. La comparación con EfficientNet-B0 es particularmente ilustrativa: con solo 4.0~M de parámetros y un fuerte sesgo convolucional, supera a ViT-B/16 por 2.37~pp (desde cero) y 0.46~pp (con transfer learning), demostrando que los sesgos inductivos convolucionales son más valiosos que la capacidad bruta de parámetros en regímenes de datos limitados.
+\paragraph{Implicaciones para el Diseno de Sistemas de Diagnostico Asistido:}
 
-\paragraph{Eficiencia de Mecanismos de Atención Local vs. Global:}
+La diferencia de 2.61 puntos porcentuales entre CoAtNet (98.35\%) y ViT-B/16 (95.74\%) tiene implicaciones clinicas relevantes: en un conjunto de prueba de 1033 imagenes, CoAtNet cometio aproximadamente 17 errores frente a los 44 de ViT-B/16. Para un sistema de apoyo al diagnostico, esta reduccion de errores puede traducirse en menos falsos positivos (pacientes sanos derivados innecesariamente) y menos falsos negativos (tumores no detectados).
 
-Los resultados obtenidos revelan una relación inversa entre el alcance del mecanismo de atención y la eficiencia computacional en la clasificación de tumores cerebrales. Swin-T (atención local por ventanas desplazadas) alcanzó un accuracy de 99.60\% y un AUC-ROC de 0.9999 con solo 27.5~M de parámetros, 164.30~ms de inferencia por batch y 2.51~GB de memoria GPU en su fase optimizada. En contraste, ViT-B/16 (atención global) obtuvo un accuracy de 97.26\% desde cero y 99.37\% con transfer learning, empleando 85.8~M de parámetros, 202.6~ms de inferencia (scratch) y 3.22~GB de memoria GPU.
+EfficientNet-B0 merece una mencion especial: con solo 4.0M de parametros y 55.3~ms de inferencia, alcanza 97.00\% de accuracy, superando a ViT-B/16 en 1.26 puntos porcentuales con el 4.7\% de sus parametros. Esto lo posiciona como la opcion ideal para despliegue en entornos con recursos limitados, donde la velocidad de inferencia y el consumo de memoria son criticos.
 
-La autoatención dentro de ventanas desplazadas (\emph{Shifted Windows}) reduce la complejidad computacional de $O(N^2)$ a $O(M^2\cdot N/M^2)=O(N\cdot M)$ para una imagen de $N$ parches con ventanas de $M$ parches cada una. En la práctica, para una imagen de entrada de $224\times224$ con parches de $4\times4$ ($N=3136$) y ventanas de $7\times7$ ($M=49$), la atención local procesa cada parche dentro de un contexto de 49~vecinos en lugar de los 3136~pares completos. Esto explica la reducción del 52\% en el tiempo de inferencia (164.30~ms frente a 341.18~ms) y del 25\% en memoria GPU (2.51~GB frente a 3.33~GB) respecto a ViT-B/16 con transfer learning.
+\paragraph{Limitaciones del Estudio:}
 
-Esta restricción local no solo no perjudica la capacidad discriminativa, sino que la mejora: Swin-T supera a ViT-B/16 en accuracy (+2.34\% vs. scratch, +0.23\% vs. pretrained) y F1-Score (+1.98\% vs. scratch, +0.19\% vs. pretrained). Este comportamiento se debe a que las regiones de interés en imágenes de glioma, meningioma y pituitary son inherentemente locales y de tamaño acotado. El mecanismo de ventanas desplazadas introduce conectividad cruzada entre ventanas en capas sucesivas, permitiendo que la información fluya a través de vecindarios progresivamente más amplios sin incurrir en el costo cuadrático de la atención global. Así, Swin-T logra un equilibrio óptimo entre eficiencia computacional y precisión diagnóstica, posicionándose como una alternativa superior a ViT-B/16 para el análisis de imágenes médicas con recursos computacionales limitados.
-
-\begin{table}[H]
-  \centering
-  \caption{Comparación de eficiencia: atención local (Swin-T) vs. atención global (ViT-B\slash{}16).}
-  \label{tab:swin_vit_comparison}
-  \begin{tabular}{lcc}
-    \hline
-    Métrica & Swin-T & ViT-B\slash{}16 \\
-    \hline
-    Parámetros & 27.5M & 85.8M \\
-    Memoria GPU (opt.) & 2.51~GB & 3.33~GB \\
-    Inferencia por batch & 164.30~ms & 341.18~ms \\
-    Accuracy (scratch / pretrained) & 99.60\% & 97.26\%~/~99.37\% \\
-    F1-Score (scratch / pretrained) & 99.66\% & 97.68\%~/~99.47\% \\
-    AUC-ROC & 0.9999 & 0.9946~/~0.9997 \\
-    \hline
-  \end{tabular}
-\end{table}
+Si bien el pipeline de normalizacion elimino los artefactos estadisticos mas evidentes (diferencia de resolucion, modo de color y distribucion de brillo entre clases), la evaluacion se limito a un unico dataset de origen publico (Kaggle). La validacion externa con imagenes de otros centros hospitalarios o protocolos de adquisicion constituye un paso necesario para confirmar la generalizabilidad de los resultados. Asimismo, el entrenamiento desde cero con 30 epocas fijas representa una configuracion basal; la incorporacion de tecnicas adicionales como data augmentation mas agresiva o aprendizaje autosupervisado podria mejorar el rendimiento, aunque a costa de introducir nuevas variables de confusion en la comparacion.

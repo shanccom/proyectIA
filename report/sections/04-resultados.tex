@@ -11,31 +11,36 @@
 \FloatBarrier
 \input{sections/04.5-coatnet}
 
-\subsection{Análisis Comparativo}
+\subsection{Analisis Comparativo}
 
-La Tabla~\ref{tab:comparative_summary} presenta una comparación directa de los resultados de las cinco arquitecturas. Para ResNet50, EfficientNet-B0, Swin-T y CoAtNet se reportan los resultados de su fase optimizada (con pesos preentrenados de ImageNet). Para ViT-B/16 se reporta el resultado del entrenamiento desde cero (scratch), por ser la métrica libre de sobreajuste y la más representativa del desempeño real del modelo sin aprovechar conocimiento externo. Swin-T alcanza el accuracy más alto (99.60\%) con el AUC-ROC más elevado (0.9999), mientras que EfficientNet-B0 logra el mejor F1-Score (99.86\%) con solo 4.0~M de parámetros. ViT-B/16, entrenado sin pesos preentrenados, obtiene 97.26\% de accuracy —el más bajo del estudio—, evidenciando que los transformers puros sin sesgos convolucionales requieren volúmenes de datos masivos para alcanzar rendimientos comparables a las CNNs. La brecha de 2.11~pp entre el ViT desde cero (97.26\%) y su versión con transfer learning (99.37\%) cuantifica el valor real del preentrenamiento en ImageNet para este dominio.
+La Tabla~\ref{tab:comparative_summary} presenta la comparacion directa de las cinco arquitecturas evaluadas. Todos los modelos fueron entrenados desde cero (sin pesos preentrenados de ImageNet) con el pipeline de normalizacion estricta (CenterCrop cuadrado, conversion RGB forzada y ecualizacion de histograma), lo que garantiza una comparacion justa al eliminar los artefactos estadisticos del dataset identificados durante el estudio.
+
+CoAtNet obtuvo el mejor desempeno global con 98.35\% de accuracy, un MCC de 0.9572 y solo 26.7M de parametros, beneficiandose de la combinacion de capas convolucionales y atencion Transformer. ResNet50 (97.48\%) y EfficientNet-B0 (97.00\%) demostraron que las arquitecturas puramente convolucionales ofrecen un rendimiento solido incluso desde cero, con la ventaja adicional de una inferencia rapida (101.9~ms y 55.3~ms por batch respectivamente). Swin-T (96.32\%) supero a ViT-B/16 (95.74\%) gracias a su mecanismo de atencion local por ventanas, confirmando que restringir la atencion a regiones anatomicamente relevantes es mas eficiente que la atencion global. ViT-B/16, pese a ser el modelo mas grande del estudio (85.8M de parametros), obtuvo el rendimiento mas bajo, evidenciando que la capacidad bruta de parametros no compensa la ausencia de sesgos inductivos en regimenes de datos limitados.
 
 \begin{table}[H]
 \centering
-\caption{Comparación de resultados. ViT-B\slash{}16 se reporta en configuración scratch (sin pesos preentrenados) por ser la métrica libre de sobreajuste; el resto de modelos en fase optimizada.}
+\caption{Comparacion de resultados. Todos los modelos entrenados desde cero con pipeline de normalizacion estricta (scratch + normalizado).}
 \label{tab:comparative_summary}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{lccccc}
 \hline
-Métrica & ResNet50 & ENet-B0 & ViT-B/16$^*$ & Swin-T & CoAtNet \\
+Metrica & ResNet50 & ENet-B0 & ViT-B/16 & Swin-T & CoAtNet \\
 \hline
-Accuracy (\%) & 99.54 & 99.83 & 97.26 & 99.60 & 99.37 \\
-F1-Score (\%) & 99.61 & 99.86 & 97.68 & 99.66 & 99.47 \\
-AUC-ROC & 0.9998 & 0.9998 & 0.9946 & 0.9999 & 0.9999 \\
-Parámetros (M) & 23.5 & 4.0 & 85.8 & 27.5 & 26.7 \\
-Inferencia (ms) & 108.4 & 43.9 & 202.6 & 164.3 & 157.3 \\
-FP/FN & 2/6 & 1/2 & 24/24 & 4/3 & 4/7 \\
+Accuracy (\%) & 97.48 & 97.00 & 95.74 & 96.32 & 98.35 \\
+F1-Score (\%) & 98.31 & 97.98 & 96.61 & 97.50 & 98.89 \\
+MCC & 0.9341 & 0.9215 & 0.8916 & 0.9070 & 0.9572 \\
+AUC-ROC & 0.9980 & 0.9919 & 0.9892 & 0.9955 & 0.9952 \\
+Parametros (M) & 23.5 & 4.0 & 85.8 & 27.5 & 26.7 \\
+Inferencia (ms) & 101.9 & 55.3 & 205.5 & 118.6 & 137.2 \\
 \hline
 \end{tabular}
 }
-\\[4pt]
-{\small $^*$ ViT-B/16 entrenado desde cero (scratch), sin pesos preentrenados de ImageNet.}
-\end{table}
 \end{table}
 
-En términos de eficiencia computacional, EfficientNet-B0 destaca con solo 43.9~ms de inferencia por batch y 4.0~M de parámetros, siendo ideal para entornos con recursos limitados. Swin-T ofrece el mejor balance entre precisión y eficiencia entre los transformers. ViT-B/16, con 85.8~M de parámetros y entrenado desde cero, alcanza apenas 97.26\% con 48 errores de clasificación (24 FP, 24 FN), confirmando que los transformers puros sin sesgos convolucionales son inadecuados para datasets médicos de tamaño moderado sin recurrir al transfer learning. La diferencia de 2.37~pp entre ViT (97.26\%) y EfficientNet-B0 (99.83\%) con 95\% menos parámetros demuestra la superioridad de las arquitecturas convolucionales en este dominio.
+En terminos de eficiencia computacional, EfficientNet-B0 destaca con solo 55.3~ms de inferencia y 4.0M de parametros, siendo 3.7 veces mas rapido que ViT-B/16 con el 4.7\% de sus parametros. CoAtNet ofrece el mejor equilibrio entre precision y eficiencia: supera a ResNet50 en accuracy (+0.87~pp) con apenas 3.2M de parametros adicionales. ViT-B/16, con 85.8M de parametros, es el modelo mas lento (205.5~ms) y el menos preciso, confirmando que las arquitecturas con sesgos convolucionales o mecanismos de atencion local son mas adecuadas para la clasificacion de tumores cerebrales en conjuntos de datos de tamano moderado.
+
+\subsection{Analisis de Artefactos del Dataset}
+
+Un hallazgo relevante de este estudio fue la identificacion de artefactos sistematicos en el dataset original que inflaban artificialmente las metricas. Las imagenes de la clase ``yes'' (tumor) provenian mayoritariamente de fuentes con resolucion 512$\times$512 y modo escala de grises, mientras que las de la clase ``no'' (sano) presentaban resoluciones significativamente menores (mediana 228$\times$242) y formato RGB. Estas diferencias permitian a un clasificador logistico basado unicamente en estadisticas de pixel (sin acceso al contenido visual) alcanzar un 83.5\% de accuracy. Tras aplicar el pipeline de normalizacion (CenterCrop, ecualizacion y conversion RGB), dicho clasificador ciego descendio a 47.5\% —por debajo del azar—, confirmando la eliminacion efectiva de los artefactos. Las metricas reportadas en este estudio reflejan por tanto el desempeno real de los modelos sin atajos estadisticos.
+
+(End of file - total 58 lines)

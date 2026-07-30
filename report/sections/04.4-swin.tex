@@ -1,107 +1,33 @@
 \subsection{Swin Transformer}
 
-\paragraph{Fase Base:}
-En la fase base, el modelo Swin-T fue entrenado durante 30 épocas con una tasa de aprendizaje fija de $1\times10^{-4}$ y un consumo de memoria GPU de 3.56~GB. Las métricas obtenidas en el conjunto de prueba se presentan en la Tabla~\ref{tab:swin_base_metrics}. Se obtuvo un accuracy de 99.37\%, un F1-Score de 99.47\% y un AUC-ROC de 0.9996, evidenciando una alta capacidad discriminativa.
+\paragraph{Entrenamiento desde cero (scratch + normalizado):}
+Swin-T fue entrenado desde cero con el pipeline de normalización estricta durante 30 épocas con tasa de aprendizaje inicial de $1\times10^{-4}$, reducida por ReduceLROnPlateau en las épocas finales. Las métricas obtenidas se presentan en la Tabla~\ref{tab:swin_scratch_metrics}.
 
 \begin{table}[H]
 \centering
-\caption{Métricas de evaluación de Swin-T en la fase base.}
-\label{tab:swin_base_metrics}
+\caption{Métricas de Swin-T entrenado desde cero con pipeline normalizado.}
+\label{tab:swin_scratch_metrics}
 \begin{tabular}{lc}
 \hline
 Métrica & Valor \\
 \hline
-Accuracy  & 99.37\% \\
-Balanced Accuracy & 99.32\% \\
-Precisión & 99.33\% \\
-Recall (Sensibilidad) & 99.61\% \\
-Especificidad & 99.02\% \\
-F1-Score & 99.47\% \\
-MCC & 0.9870 \\
-AUC-ROC & 0.9996 \\
-Tiempo de inferencia & 163.83~ms/lote \\
+Accuracy  & 96.32\% \\
+Balanced Accuracy & 96.53\% \\
+Precisión & 98.93\% \\
+Recall (Sensibilidad) & 96.10\% \\
+Especificidad & 96.96\% \\
+F1-Score & 97.50\% \\
+MCC & 0.9070 \\
+AUC-ROC & 0.9955 \\
 \hline
 \end{tabular}
 \end{table}
 
-La pérdida de entrenamiento descendió de 0.092 en la primera época hasta $1.3\times10^{-4}$ en la época~30. La pérdida de validación mínima se registró en la época~5 con un valor de 0.0091, aunque se observaron fluctuaciones significativas a lo largo del entrenamiento (0.009--0.069), reflejando inestabilidad en la convergencia con tasa fija. El mejor accuracy de validación se alcanzó en la época~4 con 99.79\%.
-
-Si bien las métricas globales son elevadas, se observa un claro sobreajuste (\textit{overfitting}) en la fase base. La pérdida de entrenamiento continúa disminuyendo hasta valores casi nulos ($1.3\times10^{-4}$), mientras que la pérdida de validación se estabiliza en un rango superior y muestra una tendencia al alza a partir de la época~5. El accuracy de entrenamiento alcanza el 100\% en varias épocas, mientras que el accuracy de validación oscila entre 98.50\% y 99.79\%, sin lograr superar ese techo. Esta brecha creciente entre las curvas de entrenamiento y validación (Figura~\ref{fig:swin_base_lc}) es consistente con overfitting, atribuible a la alta capacidad del transformer (27.52M de parámetros) combinada con un conjunto de datos relativamente pequeño y la ausencia de regularización por tasa de aprendizaje adaptativa.
+Swin-T superó a ViT-B/16 por 0.58 puntos porcentuales (96.32\% vs. 95.74\%) con 68\% menos parámetros (27.5M vs. 85.8M). El mecanismo de atención local por ventanas desplazadas ($7\times7$) demostró ser más eficiente que la atención global de ViT-B/16, permitiendo al modelo concentrarse en regiones anatómicas locales relevantes. Las curvas de aprendizaje (Figura~\ref{fig:swin_scratch_lc}) confirman un entrenamiento estable sin sobreajuste, con el mejor modelo registrado en la época~29 (val\_loss de 0.0583).
 
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/swin/base/confusion_matrix.png}
-    \caption{Matriz de confusión de Swin-T en la fase base.}
-    \label{fig:swin_base_cm}
-\end{minipage}
-\hfill
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/swin/base/roc_curve.png}
-    \caption{Curva ROC de Swin-T en la fase base.}
-    \label{fig:swin_base_roc}
-\end{minipage}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.72\columnwidth]{../BrainTumor/results/swin/base/learning_curves.png}
-\caption{Curvas de aprendizaje de Swin-T en la fase base. Se aprecia la divergencia entre pérdida de entrenamiento y validación a partir de la época~5, indicando overfitting.}
-\label{fig:swin_base_lc}
-\end{figure}
-
-\paragraph{Fase Optimizada:}
-En la fase optimizada, se implementaron ReduceLROnPlateau (factor 0.5, paciencia 5) y early stopping con paciencia de 7 épocas sobre val\_loss. La tasa de aprendizaje se redujo automáticamente de $1\times10^{-4}$ a $5\times10^{-5}$ en la época~11. El entrenamiento se detuvo en la época~13 por early stopping, preservando los pesos de la época~6 (mejor val\_loss de 0.0027). El consumo de memoria GPU se redujo de 3.56~GB a 2.51~GB, y el tiempo por época disminuyó de $\sim$89~s a $\sim$50~s gracias al early stopping.
-
-El modelo optimizado alcanzó las métricas reportadas en la Tabla~\ref{tab:swin_opt_metrics}. El accuracy mejoró a 99.60\% y el F1-Score a 99.66\%, manteniendo un AUC-ROC de 0.9995.
-
-\begin{table}[H]
-\centering
-\caption{Métricas de evaluación de Swin-T en la fase optimizada.}
-\label{tab:swin_opt_metrics}
-\begin{tabular}{lc}
-\hline
-Métrica & Valor \\
-\hline
-Accuracy  & 99.60\% \\
-Balanced Accuracy & 99.60\% \\
-Precisión & 99.71\% \\
-Recall (Sensibilidad) & 99.61\% \\
-Especificidad & 99.58\% \\
-F1-Score & 99.66\% \\
-MCC & 0.9917 \\
-AUC-ROC & 0.9995 \\
-Tiempo de inferencia & 149.00~ms/lote \\
-\hline
-\end{tabular}
-\end{table}
-
-El early stopping redujo las épocas de 30 a 13, y todas las métricas principales mejoraron. La matriz de confusión del Swin-T optimizado (Figura~\ref{fig:swin_opt_cm}) revela solo 4 falsos negativos y 3 falsos positivos sobre 1752 muestras de prueba (717 sin tumor, 1035 con tumor), reduciendo los errores totales de 11 a 7 respecto a la fase base. Esta precisión se atribuye al mecanismo de autoatención con ventanas desplazadas, que restringe la atención a ventanas de tamaño fijo ($7\times7$), reduciendo la complejidad de $O(N^2)$ a $O(M^2\cdot N/M^2)$ donde $M=49$. Esta aproximación local resulta particularmente efectiva en imágenes médicas, donde las características discriminativas están concentradas en regiones anatómicas locales. La curva ROC (Figura~\ref{fig:swin_opt_roc}) confirma un AUC-ROC de 0.9995.
-
-A diferencia de la fase base, las curvas de aprendizaje de la fase optimizada (Figura~\ref{fig:swin_opt_lc}) muestran una convergencia más estable y controlada. La pérdida de validación alcanza su mínimo en la época~6 (0.0027), y aunque posteriormente se observa un ligero incremento, el early stopping interrumpe el entrenamiento antes de que el overfitting se agrave. La pérdida de entrenamiento continúa descendiendo hasta 0.0016, pero la brecha con la validación es significativamente menor que en la fase base, evidenciando que la reducción de la tasa de aprendizaje y la detención temprana mitigan eficazmente el sobreajuste.
-
-\begin{figure}[H]
-\centering
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/swin/optimized/confusion_matrix.png}
-    \caption{Matriz de confusión de Swin-T optimizado.}
-    \label{fig:swin_opt_cm}
-\end{minipage}
-\hfill
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/swin/optimized/roc_curve.png}
-    \caption{Curva ROC de Swin-T optimizado.}
-    \label{fig:swin_opt_roc}
-\end{minipage}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.72\columnwidth]{../BrainTumor/results/swin/optimized/learning_curves.png}
-\caption{Curvas de aprendizaje de Swin-T optimizado. El early stopping en la época~13 controla el overfitting al detener el entrenamiento antes de que la pérdida de validación se degrade significativamente.}
-\label{fig:swin_opt_lc}
+    \includegraphics[width=0.95\columnwidth]{../BrainTumor/results/swin/normalized_scratch/learning_curves.png}
+    \caption{Curvas de aprendizaje de Swin-T desde cero con pipeline normalizado.}
+    \label{fig:swin_scratch_lc}
 \end{figure}

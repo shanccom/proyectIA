@@ -1,89 +1,33 @@
 \subsection{CoAtNet}
 
-\paragraph{Fase Base:}
-En la fase base, el modelo CoAtNet fue entrenado durante 30 épocas con una tasa de aprendizaje fija de $1\times10^{-4}$. Las métricas obtenidas en el conjunto de prueba se presentan en la Tabla~\ref{tab:coatnet_base_metrics}. El AUC-ROC de 0.9996 indica una capacidad de discriminación casi perfecta entre las clases tumor y no tumor.
+\paragraph{Entrenamiento desde cero (scratch + normalizado):}
+CoAtNet, el modelo híbrido que combina capas convolucionales MBConv con bloques de atención Transformer, fue entrenado desde cero con el pipeline de normalización estricta durante 30 épocas. Las métricas obtenidas se presentan en la Tabla~\ref{tab:coatnet_scratch_metrics}.
 
 \begin{table}[H]
 \centering
-\caption{Métricas de evaluación de CoAtNet en la fase base.}
-\label{tab:coatnet_base_metrics}
+\caption{Métricas de CoAtNet entrenado desde cero con pipeline normalizado.}
+\label{tab:coatnet_scratch_metrics}
 \begin{tabular}{lc}
 \hline
 Métrica & Valor \\
 \hline
-Accuracy  & 99.43\% \\
-Balanced Accuracy & 99.45\% \\
-Precisión & 99.71\% \\
-Recall (Sensibilidad) & 99.32\% \\
-Especificidad & 99.58\% \\
-F1-Score & 99.52\% \\
-MCC & 0.9882 \\
-AUC-ROC & 0.9996 \\
+Accuracy  & 98.35\% \\
+Balanced Accuracy & 98.27\% \\
+Precisión & 99.34\% \\
+Recall (Sensibilidad) & 98.44\% \\
+Especificidad & 98.10\% \\
+F1-Score & 98.89\% \\
+MCC & 0.9572 \\
+AUC-ROC & 0.9952 \\
 \hline
 \end{tabular}
 \end{table}
 
-La curva de pérdida durante el entrenamiento muestra una convergencia rápida en las primeras épocas, con el valor de pérdida de entrenamiento descendiendo de 0.097 a aproximadamente $2.2\times10^{-5}$ en la época 16. La pérdida de validación alcanzó su punto mínimo en la época 14 con un valor de 0.0055, manteniéndose estable durante el resto del entrenamiento. A partir de la época 20, se observaron ligeras fluctuaciones en la pérdida de validación, lo que sugiere un posible sobreajuste leve en las épocas finales.
-
-En cuanto a la evolución de las métricas de validación, el modelo alcanzó su mejor accuracy de validación de 99.86\% en la época 14, con un F1-Score de 99.88\% y un MCC de 0.9971.
+CoAtNet obtuvo el mejor desempeño del estudio con 98.35\% de accuracy, superando a ViT-B/16 por 2.61 puntos porcentuales con 69\% menos parámetros (26.7M vs. 85.8M). La combinación de convoluciones iniciales —que proveen sesgo inductivo de localidad— con atención global en etapas profundas resultó en el equilibrio óptimo entre capacidad de representación y eficiencia. Las curvas de aprendizaje muestran una convergencia excepcionalmente rápida: en la época~3 el modelo ya alcanzaba 96.62\% de accuracy en validación. El entrenamiento fue el más estable de todos los modelos evaluados, con una brecha train/val de solo 0.0000 en la mejor época (época~14, val\_loss de 0.0389), evidenciando ausencia total de sobreajuste.
 
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/coatnet/base/confusion_matrix.png}
-    \caption{Matriz de confusión de CoAtNet en la fase base.}
-    \label{fig:coatnet_base_cm}
-\end{minipage}
-\hfill
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/coatnet/base/roc_curve.png}
-    \caption{Curva ROC de CoAtNet en la fase base.}
-    \label{fig:coatnet_base_roc}
-\end{minipage}
-\end{figure}
-
-\paragraph{Fase Optimizada:}
-En la fase optimizada, se implementaron técnicas de regularización como reducción de tasa de aprendizaje (ReduceLROnPlateau) y early stopping con paciencia de 7 épocas sobre el val\_loss. El entrenamiento se detuvo en la época 13, preservando los pesos del mejor modelo.
-
-El modelo optimizado alcanzó las métricas reportadas en la Tabla~\ref{tab:coatnet_opt_metrics}. El AUC-ROC alcanzó 0.9999, superando ligeramente a la fase base, y la pérdida de validación mínima fue de 0.00399, inferior a la obtenida previamente.
-
-\begin{table}[H]
-\centering
-\caption{Métricas de evaluación de CoAtNet en la fase optimizada.}
-\label{tab:coatnet_opt_metrics}
-\begin{tabular}{lc}
-\hline
-Métrica & Valor \\
-\hline
-Accuracy  & 99.37\% \\
-Balanced Accuracy & 99.38\% \\
-Precisión & 99.61\% \\
-Recall (Sensibilidad) & 99.32\% \\
-Especificidad & 99.44\% \\
-F1-Score & 99.47\% \\
-MCC & 0.9870 \\
-AUC-ROC & 0.9999 \\
-\hline
-\end{tabular}
-\end{table}
-
-El early stopping permitió reducir significativamente el tiempo de entrenamiento (13 épocas frente a 30), disminuyendo el consumo de memoria GPU de 5.33 GB a 3.02 GB y el tiempo de inferencia de 159.39 ms a 157.26 ms por batch. A pesar de la reducción en el número de épocas, el AUC-ROC mejoró de 0.9996 a 0.9999, demostrando que la optimización con regularización y early stopping no solo acelera el entrenamiento sino que también mejora la capacidad de discriminación del modelo.
-
-\begin{figure}[H]
-\centering
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/coatnet/optimized/confusion_matrix.png}
-    \caption{Matriz de confusión de CoAtNet optimizado.}
-    \label{fig:coatnet_opt_cm}
-\end{minipage}
-\hfill
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/coatnet/optimized/roc_curve.png}
-    \caption{Curva ROC de CoAtNet optimizado.}
-    \label{fig:coatnet_opt_roc}
-\end{minipage}
+    \includegraphics[width=0.95\columnwidth]{../BrainTumor/results/coatnet/normalized_scratch/learning_curves.png}
+    \caption{Curvas de aprendizaje de CoAtNet desde cero con pipeline normalizado.}
+    \label{fig:coatnet_scratch_lc}
 \end{figure}

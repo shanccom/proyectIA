@@ -1,54 +1,12 @@
 \subsection{EfficientNet-B0}
 
-\paragraph{Fase Base:}
-En la fase base, la arquitectura liviana EfficientNet-B0 fue evaluada utilizando la configuración estándar sin regularización dinámica. El modelo demostró una convergencia ágil debido a su optimización de escalado compuesto (*compound scaling*), alcanzando un AUC-ROC representativo sobre la partición de prueba.
+\paragraph{Entrenamiento desde cero (scratch + normalizado):}
+EfficientNet-B0, la arquitectura más compacta del estudio con solo 4.0M de parámetros, fue entrenada desde cero con el pipeline de normalización estricta durante 30 épocas con tasa de aprendizaje fija de $1\times10^{-4}$. Las métricas obtenidas se presentan en la Tabla~\ref{tab:effnet_scratch_metrics}.
 
 \begin{table}[H]
 \centering
-\caption{Métricas de evaluación de EfficientNet-B0 en la fase base.}
-\label{tab:effnet_base_metrics}
-\begin{tabular}{lc}
-\hline
-Métrica & Valor \\
-\hline
-Accuracy  & 98.86\% \\
-Balanced Accuracy & 98.80\% \\
-Precisión & 99.12\% \\
-Recall (Sensibilidad) & 99.01\% \\
-Especificidad & 98.59\% \\
-F1-Score & 99.06\% \\
-MCC & 0.9752 \\
-AUC-ROC & 0.9991 \\
-\hline
-\end{tabular}
-\end{table}
-
-\begin{figure}[H]
-\centering
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/efficientnet_b0/base/confusion_matrix.png}
-    \caption{Matriz de confusión de EfficientNet-B0 en la fase base.}
-    \label{fig:effnet_base_cm}
-\end{minipage}
-\hfill
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/efficientnet_b0/base/roc_curve.png}
-    \caption{Curva ROC de EfficientNet-B0 en la fase base.}
-    \label{fig:effnet_base_roc}
-\end{minipage}
-\end{figure}
-
-\paragraph{Fase Optimizada:}
-En la fase optimizada, se mantuvieron los esquemas de regularización con una tasa de aprendizaje inicial de $1\times10^{-4}$, *data augmentation* y precisión mixta (AMP). El modelo completó las 30 épocas de entrenamiento registrando su mínima pérdida de validación en la época~10 con un \textit{val\_loss} de 0.0682 y una exactitud de validación del 98.26\%.
-
-El modelo optimizado alcanzó las métricas resumidas en la Tabla~\ref{tab:effnet_opt_metrics}. A pesar de contar únicamente con 4,010,110 parámetros ($82.9\%$ menos parámetros que ResNet50), la arquitectura logró un accuracy del 97.00\%, un F1-Score del 97.98\% y un AUC-ROC de 0.9919.
-
-\begin{table}[H]
-\centering
-\caption{Métricas de evaluación de EfficientNet-B0 en la fase optimizada.}
-\label{tab:effnet_opt_metrics}
+\caption{Métricas de EfficientNet-B0 entrenado desde cero con pipeline normalizado.}
+\label{tab:effnet_scratch_metrics}
 \begin{tabular}{lc}
 \hline
 Métrica & Valor \\
@@ -65,21 +23,11 @@ AUC-ROC & 0.9919 \\
 \end{tabular}
 \end{table}
 
-En la partición de prueba (1033 imágenes), la matriz de confusión registró 752 verdaderos positivos y 250 verdaderos negativos, con solo 13 falsos positivos y 18 falsos negativos. La ligereza estructural del modelo se tradujo en un tiempo de inferencia de apenas 55.28~ms por batch y un consumo reducido de memoria GPU (2.77~GB), posicionando a EfficientNet-B0 como una alternativa altamente eficiente para entornos con limitaciones de cómputo. Las matrices de confusión y curvas ROC se presentan en las Figuras~\ref{fig:effnet_opt_cm} y \ref{fig:effnet_opt_roc}.
+A pesar de contar con 95\% menos parámetros que ViT-B/16, EfficientNet-B0 supera al transformer puro en 1.26 puntos porcentuales de accuracy. El modelo convergió rápidamente gracias a su compound scaling, alcanzando el mejor val\_loss de 0.0682 en la época~10. Las curvas de aprendizaje muestran un entrenamiento saludable sin divergencia significativa entre train y validación. Con solo 55.28~ms de inferencia por batch, EfficientNet-B0 es el modelo más rápido del estudio, posicionándose como la opción más eficiente para entornos con recursos computacionales limitados.
 
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/efficientnet_b0/optimized/confusion_matrix.png}
-    \caption{Matriz de confusión de EfficientNet-B0 optimizado.}
-    \label{fig:effnet_opt_cm}
-\end{minipage}
-\hfill
-\begin{minipage}{0.48\columnwidth}
-    \centering
-    \includegraphics[width=\columnwidth]{../BrainTumor/results/efficientnet_b0/optimized/roc_curve.png}
-    \caption{Curva ROC de EfficientNet-B0 optimizado.}
-    \label{fig:effnet_opt_roc}
-\end{minipage}
+    \includegraphics[width=0.95\columnwidth]{../BrainTumor/results/efficientnet_b0/normalized_scratch/learning_curves.png}
+    \caption{Curvas de aprendizaje de EfficientNet-B0 desde cero con pipeline normalizado.}
+    \label{fig:effnet_scratch_lc}
 \end{figure}
