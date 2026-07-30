@@ -43,9 +43,9 @@ La pérdida de entrenamiento disminuyó progresivamente hasta alcanzar valores c
 \end{figure}
 
 \paragraph{Fase Optimizada:}
-En la fase optimizada, se implementaron técnicas de regularización como reducción de tasa de aprendizaje (ReduceLROnPlateau) y early stopping con paciencia de 7 épocas sobre el val\_loss, junto con data augmentation y precisión mixta (AMP). El entrenamiento se detuvo automáticamente tras registrar la mejor pérdida de validación.
+En la fase optimizada, se implementaron técnicas de regularización como reducción de tasa de aprendizaje (ReduceLROnPlateau) y early stopping sobre el val\_loss, junto con data augmentation y precisión mixta (AMP). El modelo completó las 30 épocas de entrenamiento alcanzando su punto mínimo de pérdida de validación en la época~20 con un val\_loss de 0.0553 y un accuracy de validación del 98.26\%.
 
-El modelo optimizado alcanzó las métricas reportadas en la Tabla~\ref{tab:resnet_opt_metrics}. El AUC-ROC alcanzó 0.9998 y el accuracy mejoró a 99.54\%, superando los resultados de la fase base.
+El modelo optimizado alcanzó las métricas reportadas en la Tabla~\ref{tab:resnet_opt_metrics}. El AUC-ROC alcanzó 0.9980 y el accuracy fue del 97.48\%.
 
 \begin{table}[H]
 \centering
@@ -55,19 +55,19 @@ El modelo optimizado alcanzó las métricas reportadas en la Tabla~\ref{tab:resn
 \hline
 Métrica & Valor \\
 \hline
-Accuracy  & 99.54\% \\
-Balanced Accuracy & 99.57\% \\
-Precisión & 99.81\% \\
-Recall (Sensibilidad) & 99.42\% \\
-Especificidad & 99.72\% \\
-F1-Score & 99.61\% \\
-MCC & 0.9906 \\
-AUC-ROC & 0.9998 \\
+Accuracy  & 97.48\% \\
+Balanced Accuracy & 96.93\% \\
+Precisión & 98.56\% \\
+Recall (Sensibilidad) & 98.05\% \\
+Especificidad & 95.82\% \\
+F1-Score & 98.31\% \\
+MCC & 0.9341 \\
+AUC-ROC & 0.9980 \\
 \hline
 \end{tabular}
 \end{table}
 
-La optimización redujo los errores de clasificación a solo 2 falsos positivos y 6 falsos negativos sobre 1752 muestras de prueba, disminuyendo el 33.3\% de los errores respecto a la fase base. La combinación de AMP y data augmentation redujo el consumo de recursos computacionales, registrando un tiempo de inferencia de 108.42~ms por batch. Las matrices de confusión (Figuras~\ref{fig:resnet_base_cm} y \ref{fig:resnet_opt_cm}) reflejan esta mejora, y la curva ROC (Figura~\ref{fig:resnet_opt_roc}) confirma un AUC-ROC de 0.9998.
+En la evaluación sobre la partición de prueba (1033 muestras), el modelo registró 15 falsos positivos y 11 falsos negativos. La combinación de AMP y data augmentation optimizó la carga computacional, registrando un tiempo de inferencia de 101.89~ms por batch. Las matrices de confusión (Figuras~\ref{fig:resnet_base_cm} y \ref{fig:resnet_opt_cm}) reflejan este comportamiento, y la curva ROC (Figura~\ref{fig:resnet_opt_roc}) confirma un AUC-ROC de 0.9980.
 
 \begin{figure}[H]
 \centering
